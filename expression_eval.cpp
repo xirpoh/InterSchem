@@ -116,12 +116,11 @@ void convInfix2Postfix(TokenList& ifix) {
                     strcpy(token[i].str, "logicNot");
                 if (token[i].op_id == 4)
                     strcpy(token[i].str, "bitwiseNot");
-                if (token[i].op_id == 4)
-                    strcpy(token[i].str, "bitwiseNot");
                 
                 token[i].id = FUNC;
                 token[i].len = strlen(token[i].str);
-                token[i].op_id = 0;
+                if (token[i].op_id < 9)
+                    token[i].op_id = 0;
                 if (token[i + 1].id == OPRT)
                     i++;
             }
