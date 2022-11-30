@@ -518,7 +518,46 @@ void writeContainer(blk& bl) {
     bl.container = cont;
 }
 
+int dist(int x1, int y1, int x2, int y2) {
+    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}
+
 void rightClick() {
+    for (int i = 0; i < blkSize; i++)
+        if (b[i].type == START || b[i].type == EXPR  || b[i].type == READ || b[i].type == WRITE) {
+            int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
+            if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
+                drawaux(b[i], b[b[i].next], RED, 0, 0);
+                delay(ANIM_DELAY);
+                drawaux(b[i], b[b[i].next], 0, 0, 0);
+                b[i].next = 0;
+                clearmouseclick(WM_RBUTTONDOWN);
+                return;
+            }
+        }
+        else if (b[i].type == DECISION) {
+            int cx = b[i].x, cy = b[i].y + b[i].h / 2;
+            if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
+                drawaux(b[i], b[b[i].next], RED, DECISION, 0);
+                delay(ANIM_DELAY);
+                drawaux(b[i], b[b[i].next], 0, DECISION, 0);
+                b[i].next = 0;
+                clearmouseclick(WM_RBUTTONDOWN);
+                return;
+            }
+
+            cx = b[i].x + b[i].w, cy = b[i].y + b[i].h / 2;
+            if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
+                drawaux(b[i], b[b[i].nextF], RED, DECISION, 1);
+                delay(ANIM_DELAY);
+                drawaux(b[i], b[b[i].nextF], 0, DECISION, 1);
+                b[i].nextF = 0;
+                clearmouseclick(WM_RBUTTONDOWN);
+                return;
+            }
+        }
+
+
     int mx = mousex(), my = mousey();
     int idx = selectBlk(mx, my);
 
@@ -528,7 +567,7 @@ void rightClick() {
         while (!ismouseclick(WM_RBUTTONUP)) {
             delay(DELAY);
         }
-        delay(100);
+        delay(ANIM_DELAY);
         clearBlk(b[idx]);
 
         for (int i = idx + 1; i < blkSize; i++)
@@ -568,9 +607,6 @@ void rightClick() {
     clearmouseclick(WM_RBUTTONUP);
 }
 
-int dist(int x1, int y1, int x2, int y2) {
-    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-}
 
 void createCnnt(int source, int br) {
     clearmouseclick(WM_LBUTTONDOWN);

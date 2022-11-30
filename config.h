@@ -23,6 +23,7 @@
 #define blkW  70
 #define blkH  40
 #define DELAY 15
+#define ANIM_DELAY 100
 #define BLK_STROKE 15
 #define CNNT_R 7     
 #define EDGE_R 7
