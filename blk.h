@@ -14,6 +14,8 @@ void createBlk(char type, int x, int y) {
         bl.container = "START";
     else if (type == STOP)
         bl.container = "STOP";
+    else 
+        bl.container = "";
     /*else if (type == DECISION)
         bl.container = "IF";
     else if(type == EXPR) 
@@ -468,13 +470,26 @@ void leftClick() {
 void writeContainer(blk& bl) {
     char bar[maxLEN], key, tmp[2];
     bar[0] = '\0';
-
+    if (bl.container.size()) {
+        strcpy(bar, stringToChar(bl.container)), cout << bar << '\n';
+        bl.container = "";
+    }
+    
     while (1) {
         int len = strlen(bar);
         key = getch();
         if (key == ENTER_KEY)
             break;
         else if (key == BACKSPACE_KEY) {
+            if (bl.w > blkW && textwidth(bar) + 3*BOUND_TXT < bl.w) {
+                clearBlk(bl);
+                drawCnnt(BG);
+                bl.x += BOUND_TXT / 2;
+                bl.w -= BOUND_TXT;
+                drawBlk(bl);
+                drawCnnt(WHITE);
+            }
+            
             if (len) {
                 setcolor(BG);
                 outtextxy(bl.x + bl.w / 2 - textwidth(bar) / 2, 
@@ -483,13 +498,6 @@ void writeContainer(blk& bl) {
                 setcolor(BLK_STROKE);
                 outtextxy(bl.x + bl.w / 2 - textwidth(bar) / 2, 
                           bl.y + bl.h / 2 - textheight(bar) / 2, bar);
-            }
-
-            if (bl.w > blkW && textwidth(bar) + BOUND_TXT < bl.w) {
-                clearBlk(bl);
-                bl.x += BOUND_TXT / 2;
-                bl.w -= BOUND_TXT;
-                drawBlk(bl);
             }
 
             continue;
@@ -507,9 +515,11 @@ void writeContainer(blk& bl) {
         
         if (textwidth(bar) + BOUND_TXT > bl.w) {
             clearBlk(bl);
+            drawCnnt(BG);
             bl.x -= BOUND_TXT;
             bl.w += BOUND_TXT * 2;
             drawBlk(bl);
+            drawCnnt(WHITE);
         }
         delay(DELAY);
     }
@@ -522,73 +532,92 @@ int dist(int x1, int y1, int x2, int y2) {
     return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
-void rightClick() {
+void removeBlk(int idx) {
+    b[idx].color = RED;
+    drawBlk(b[idx]);
+    while (!ismouseclick(WM_RBUTTONUP)) {
+        delay(DELAY);
+    }
+    delay(ANIM_DELAY);
+    clearBlk(b[idx]);
+
+    for (int i = idx + 1; i < blkSize; i++)
+        b[i - 1] = b[i];
+    blkSize--;
+
+    for (int i = 0; i < blkSize; i++) {
+        if (b[i].next == idx)
+            b[i].next = 0;
+        if (b[i].nextF == idx)
+            b[i].nextF = 0;
+        if (b[i].next > idx)
+            b[i].next--;
+        if (b[i].nextF > idx)
+            b[i].nextF--;
+    }
+
+    drawScheme();
+}
+
+bool removeCnnt(int mx, int my) {
     for (int i = 0; i < blkSize; i++)
         if (b[i].type == START || b[i].type == EXPR  || b[i].type == READ || b[i].type == WRITE) {
             int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
                 drawaux(b[i], b[b[i].next], RED, 0, 0);
+                while (!ismouseclick(WM_RBUTTONUP)) {
+                    delay(DELAY);
+                }
                 delay(ANIM_DELAY);
                 drawaux(b[i], b[b[i].next], 0, 0, 0);
                 b[i].next = 0;
-                clearmouseclick(WM_RBUTTONDOWN);
-                return;
+                return 1;
             }
         }
         else if (b[i].type == DECISION) {
             int cx = b[i].x, cy = b[i].y + b[i].h / 2;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
                 drawaux(b[i], b[b[i].next], RED, DECISION, 0);
+                while (!ismouseclick(WM_RBUTTONUP)) {
+                    delay(DELAY);
+                }
                 delay(ANIM_DELAY);
                 drawaux(b[i], b[b[i].next], 0, DECISION, 0);
                 b[i].next = 0;
-                clearmouseclick(WM_RBUTTONDOWN);
-                return;
+                return 1;
             }
 
             cx = b[i].x + b[i].w, cy = b[i].y + b[i].h / 2;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
                 drawaux(b[i], b[b[i].nextF], RED, DECISION, 1);
+                while (!ismouseclick(WM_RBUTTONUP)) {
+                    delay(DELAY);
+                }
                 delay(ANIM_DELAY);
                 drawaux(b[i], b[b[i].nextF], 0, DECISION, 1);
                 b[i].nextF = 0;
-                clearmouseclick(WM_RBUTTONDOWN);
-                return;
+                return 1;
             }
         }
 
+    return 0;
+}
 
+void rightClick() {
     int mx = mousex(), my = mousey();
+
+    if (removeCnnt(mx, my)) {
+        clearmouseclick(WM_RBUTTONDOWN);
+        clearmouseclick(WM_RBUTTONUP);
+        return;
+    }
+
     int idx = selectBlk(mx, my);
 
     if (idx >= 0) {
-        b[idx].color = RED;
-        drawBlk(b[idx]);
-        while (!ismouseclick(WM_RBUTTONUP)) {
-            delay(DELAY);
-        }
-        delay(ANIM_DELAY);
-        clearBlk(b[idx]);
-
-        for (int i = idx + 1; i < blkSize; i++)
-            b[i - 1] = b[i];
-        blkSize--;
-
-        for (int i = 0; i < blkSize; i++) {
-            if (b[i].next == idx)
-                b[i].next = 0;
-            if (b[i].nextF == idx)
-                b[i].nextF = 0;
-            if (b[i].next > idx)
-                b[i].next--;
-            if (b[i].nextF > idx)
-                b[i].nextF--;
-        }
-
-        drawScheme();
+        removeBlk(idx);
     }
     else {
-
         char type = max(1, min(getch() - '0', 6));
 
         createBlk(type, mousex(), mousey());
@@ -639,7 +668,6 @@ bool mouseHoverEvent(int source, int cx, int cy, int br = 0) {
 }
 
 bool mouseHover() {
-    
     for (int i = 0; i < blkSize; i++)
         if (b[i].type == START || b[i].type == EXPR  || b[i].type == READ || b[i].type == WRITE) {
             int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
@@ -664,6 +692,15 @@ bool mouseHover() {
 
     clearmouseclick(WM_LBUTTONDOWN);
     return 0;
+}
+
+void doubleLeftClick() {
+    int mx = mousex(), my = mousey();
+    int idx = selectBlk(mousex(), mousey());
+    if (idx >= 0 && b[idx].type != START && b[idx].type != STOP) {
+        writeContainer(b[idx]);
+    }
+    clearmouseclick(WM_LBUTTONDBLCLK);
 }
 
 #endif
