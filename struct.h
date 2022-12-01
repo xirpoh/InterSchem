@@ -26,7 +26,7 @@ struct usedentry {
 //};
 
 struct reg {
-    string var;
+    string name;
     float val;
 };
 

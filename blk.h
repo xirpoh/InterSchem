@@ -471,7 +471,7 @@ void writeContainer(blk& bl) {
     char bar[maxLEN], key, tmp[2];
     bar[0] = '\0';
     if (bl.container.size()) {
-        strcpy(bar, stringToChar(bl.container)), cout << bar << '\n';
+        strcpy(bar, stringToChar(bl.container));
         bl.container = "";
     }
     

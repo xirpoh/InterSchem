@@ -98,7 +98,11 @@ void tokenize(char* expr, TokenList& tl) {
                 input_oprt[1] = '\0';
             else {
                 input_oprt[1] = expr[i + 1];
-                i++; 
+                int oprt_idx = get_oprt_idx(input_oprt);
+                if (oprt_idx >= 0)
+                    i++;
+                else
+                    input_oprt[1] = '\0';
             }
             
             int oprt_idx = get_oprt_idx(input_oprt);
@@ -113,9 +117,13 @@ void tokenize(char* expr, TokenList& tl) {
     }
 }
 
+void print_token(Token& t) {
+    cout << "['" << token_names[t.id] << "', '" << t.str << "']\n";
+}
+
 void print_TokenList(TokenList& tl) {
     for (int i = 0; i < tl.num_tokens; i++)
-        cout << "['" << token_names[tl.token[i].id] << "', '" << tl.token[i].str << "']\n";
+        print_token(tl.token[i]);
     cout << "\n";
 }
 
@@ -131,61 +139,75 @@ bool is_incr_op(Token& t) {
     return t.op_id == 1 || t.op_id == 2;
 }
 
+bool is_unar_op(char op) {
+    return op == '-'  || op == '!' || op == '~';
+}
+
 int _is_expr_valid(TokenList& tl) {
     Token* token = tl.token; 
     int& num_tokens = tl.num_tokens;
-    
+    int err = 0, errIdx = -1;
+
     if (!num_tokens)
         return 0;
     
     if (token[num_tokens - 1].id == OPRT && 
         token[num_tokens - 1].op_id != 1 && token[num_tokens - 1].op_id != 2)
-        return 3;
+        err = 3, errIdx = num_tokens - 1;
 
     int openbr = 0, closedbr = 0;
-    for (int i = 0; i < num_tokens; i++) {
+    for (int i = 0; i < num_tokens && !err; i++) {
         if (token[i].id == CONST && !is_const_token_valid(token[i]))
-            return 9;
+            err = 9, errIdx = i;;
 
         if (token[i].id == OPEN_BR)
             openbr++;
         else if (token[i].id == CLOSED_BR)
             closedbr++;
         if (openbr < closedbr)
-            return 2;
+            err = 2;
     }
     if (openbr != closedbr)
-        return 1;
+        err = 1;
 
-    for (int i = 0; i < num_tokens; i++) {
-        if (i > 0 && is_incr_op(token[i]) && token[i - 1].id != VAR)
-            return 3;
+    for (int i = 0; i < num_tokens && !err; i++) {
+        //if (i > 0 && is_incr_op(token[i]) && token[i - 1].id != VAR)
+        //    err = 3, errIdx = i;
         
         if (i >= num_tokens - 1)
             break;
 
-        if (is_incr_op(token[i]) && (token[i + 1].id != VAR && token[i + 1].id != OPRT))
-            return 3;
+        if (is_incr_op(token[i]) && token[i + 1].id == CLOSED_BR)
+            continue;
+        
+        //if (is_incr_op(token[i]) && (token[i + 1].id != VAR && token[i + 1].id != OPRT))
+        //    err = 3, errIdx = i;
 
-        if (token[i].id == OPRT && !is_incr_op(token[i]) && (token[i + 1].id == OPRT || token[i + 1].id == CLOSED_BR))
-            return 3;
+        //if (token[i].id == OPRT && !is_incr_op(token[i]) && (token[i + 1].id == OPRT && 
+        //    !is_unar_op(token[i + 1].str[0])) || token[i + 1].id == CLOSED_BR)
+        //    err = 3, errIdx = i;
 
         if (token[i].id == VAR && token[i + 1].id != OPRT && token[i + 1].id != CLOSED_BR)
-            return 4;
+            err = 4, errIdx = i;
 
         if (token[i].id == CONST && token[i + 1].id != OPRT && token[i + 1].id != CLOSED_BR)
-            return 5;
-        
+            err = 5, errIdx = i;
+
         if (token[i].id == FUNC && token[i + 1].id != OPEN_BR)
-            return 6;
+            err = 6, errIdx = i;
 
         if (token[i].id == OPEN_BR && (token[i].str[0] == '*' || token[i].str[0] == '/'))
-            return 7;
-        
-        if (token[i].id == CLOSED_BR && token[i + 1].id != CLOSED_BR && token[i + 1].id != OPRT)
-            return 8;
-    }
+            err = 7, errIdx = i;
 
+        if (token[i].id == CLOSED_BR && token[i + 1].id != CLOSED_BR && token[i + 1].id != OPRT)
+            err = 8, errIdx = i;;
+    }
+    
+    if (err) {
+        if (errIdx != -1)
+            print_token(token[errIdx]);
+        return err;
+    }
     return 0;
 }
 
@@ -196,15 +218,15 @@ const char syntax_rule[10][200] = {
     "Dupa un operator poate urma o variabila (deci o litera), o functie (deci sin/cos/ln etc.), o constanta (deci o cifra) sau o paranteza deschisa (().",
     "Dupa o variabila poate urma un operator sau o paranteza inchisa ()).",
     "Dupa o constanta poate urma un operator sau o paranteza inchisa ()).",
-    "Dupa un nume de functie poate urma doar o paranteză deschisa (().",
-    "Dupa paranteză deschisă (()) poate urma o alta paranteza deschisa, un nume de functie, o variabila, o constanta sau chiar operatorul unar + sau -.",
-    "Dupa paranteza inchisa ())) poate urma o alta paranteza închisa sau un operator.",
+    "Dupa un nume de functie poate urma doar o paranteza deschisa (().",
+    "Dupa paranteză deschisa (()) poate urma o alta paranteza deschisa, un nume de functie, o variabila, o constanta sau chiar operatorul unar + sau -.",
+    "Dupa paranteza inchisa ())) poate urma o alta paranteza inchisa sau un operator.",
     "Numar real scris gresit. Un numar real scris corect contine un singur punct; poate incepe direct cu punctul."
 };
 
 bool is_expr_valid(TokenList& tl) {
     if (int e = _is_expr_valid(tl)) {
-        cerr << "<Invalid expression>\nExpresia nu respecta regula:\n" << syntax_rule[e] << "\n";
+        cout << "<Invalid expression>\n" << syntax_rule[e] << "\n";
         return 0;
     }
     return 1;

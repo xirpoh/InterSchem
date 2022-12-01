@@ -9,7 +9,7 @@ using namespace std;
 #define NUM_FUNC 30
 #define NAME_LEN 15
 #define EPS 1e-5
-#define ERROR 17
+#define ERROR -404
 
 double flipSign(double x) { return -x; }
 double keepSign(double x) { return x; }
@@ -40,7 +40,8 @@ int get_func_idx(char* input_function) {
     for (int i = 0; i < NUM_FUNC; i++)
         if (strcmp(input_function, func_names[i]) == 0)
             return i; 
-    cerr << "<Unknown function typed>\n";
+    cout << "<Unknown function typed>\n";
+    return ERROR;
 }
 
 float str_to_float(char* str) {
@@ -100,14 +101,9 @@ void convInfix2Postfix(TokenList& ifix) {
     int& sz = pfix.num_tokens;
     stack<Token> ts;
     
-    //a solution for unary operators
-    for (int i = 0; i < ifix.num_tokens; i++)
-        if (token[i].id == OPRT) 
-            if (i == 0 || token[i + 1].id == OPRT || token[i - 1].id == OPEN_BR) {
-                if (token[i].op_id == 10)
-                    strcpy(token[i].str, "flipSign");
-                if (token[i].op_id == 9)
-                    strcpy(token[i].str, "keepSign");
+    //Identify unary operators
+    for (int i = 0; i < ifix.num_tokens; i++) 
+        if (token[i].id == OPRT && token[i].op_id < 5) {
                 if (token[i].op_id == 1)
                     strcpy(token[i].str, "incr");
                 if (token[i].op_id == 2)
@@ -116,14 +112,24 @@ void convInfix2Postfix(TokenList& ifix) {
                     strcpy(token[i].str, "logicNot");
                 if (token[i].op_id == 4)
                     strcpy(token[i].str, "bitwiseNot");
-                
+
+                token[i].id = FUNC;
+                token[i].op_id = 0;
+                token[i].len = strlen(token[i].str);
+            }
+
+    for (int i = 0; i < ifix.num_tokens; i++)
+        if (token[i].id == OPRT) 
+            if (i == 0 || token[i - 1].id == OPRT || token[i - 1].id == OPEN_BR) {
+                if (token[i].op_id == 10)
+                    strcpy(token[i].str, "flipSign");
+                if (token[i].op_id == 9)
+                    strcpy(token[i].str, "keepSign");
+
                 token[i].id = FUNC;
                 token[i].len = strlen(token[i].str);
-                if (token[i].op_id < 9)
-                    token[i].op_id = 0;
-                if (token[i + 1].id == OPRT)
-                    i++;
             }
+    //
 
     for (int i = 0; i < ifix.num_tokens; i++) {
         if (token[i].id == CONST || token[i].id == VAR)
@@ -175,7 +181,11 @@ float evalPostfix(TokenList& tl) {
         }
         else if (token[i].id == FUNC) {
             float val = values.top(); values.pop();
-            values.push(call_func(get_func_idx(token[i].str), val));
+            int func_idx = get_func_idx(token[i].str);
+            if (func_idx != ERROR)
+                values.push(call_func(func_idx, val));
+            else
+                return ERROR;
         }
     }
 
@@ -187,7 +197,7 @@ float expression_eval(char* expr) {
     tokenize(expr, tl);
     
     if (is_expr_valid(tl)) {
-        print_TokenList(tl);
+        //print_TokenList(tl);
         convInfix2Postfix(tl);
         print_TokenList(tl);
         return evalPostfix(tl);

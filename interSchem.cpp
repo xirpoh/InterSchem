@@ -3,12 +3,14 @@
 #include "winbgim.h"
 #include <math.h>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 #include "config.h"
 #include "struct.h"
 #include "Generarecod.h"
 #include "blk.h"
+#include "interpretor.h"
 
 int main() {
 
@@ -19,6 +21,12 @@ int main() {
     drawScheme();
     
     while (1) {
+        if (kbhit()) {
+            char key = getch();
+            if (key == 'r')
+                runScheme();
+        }
+
         if (ismouseclick(WM_LBUTTONDBLCLK)) {
             doubleLeftClick();
         }
