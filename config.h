@@ -34,6 +34,6 @@
 #define OVERLAPBIAS 20
 #define BOUND_TXT 30
 #define HTXT LIGHTMAGENTA
-#define STEP_DELAY 100
+#define STEP_DELAY 50
 
 #endif

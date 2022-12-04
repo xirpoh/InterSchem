@@ -6,6 +6,7 @@ struct blk {
     int w, h;
     char type;
     int color;
+
     string container;
 
     int next, nextF;

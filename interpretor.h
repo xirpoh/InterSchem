@@ -54,8 +54,12 @@ void run_expression_blk(blk& bl) {
     float *reg = get_reg(var_name);
     if (reg != NULL)
         *reg = expression_eval(instr);
-    else 
-        cout << var_name << ": undeclared variable";
+    else { 
+        r[regSize].name = var_name;
+        r[regSize].val = expression_eval(instr);
+        regSize++;
+        //cout << var_name << ": undeclared variable";
+    }
 }
 
 void run_read_blk(blk& bl) {
@@ -103,7 +107,22 @@ void drawNextCnnt(blk& b1, blk& b2, bool brnch = 0) {
     drawaux(b1, b2, BLK_STROKE, b1.type, brnch);
 }
 
+void wait_key(int& mode) {
+    while (1) {
+        if (kbhit()) {
+            char key = getch();
+            if (key == 'n' || key == 'm') {
+                if (key == 'm')
+                    mode = !mode;
+                break;
+            }
+        }
+    }
+}
+
 void runInterpretor() {
+    regSize = 0;
+    int mode = 1;
     int curr_blk = find_start_blk();
     if (curr_blk == -1) {
         cout << "<START block is missing>\n";
@@ -119,14 +138,14 @@ void runInterpretor() {
                 done = 1;
                 continue;
             }
+            if (key == 'm')
+                mode = !mode;
         }
         
         clearBlk(cblk);
         cblk.color = LIGHTGREEN;
         drawBlk(cblk);
         delay(STEP_DELAY);
-        deselectBlk(cblk);
-        drawBlk(cblk);
         
         if(cblk.type == START) {
             run_start_blk(cblk);
@@ -134,6 +153,8 @@ void runInterpretor() {
         
         if (cblk.type == STOP) {
             run_stop_blk(cblk);
+            deselectBlk(cblk);
+            drawBlk(cblk);
             done = 1;
         }
         
@@ -149,12 +170,22 @@ void runInterpretor() {
             run_write_blk(cblk);
         }
         
+        if (cblk.type != DECISION && cblk.type != STOP) {
+            if (mode) wait_key(mode);
+            deselectBlk(cblk);
+            drawBlk(cblk);
+        }
+        
         if (cblk.type == DECISION) {
             int isTrue = run_decision_blk(cblk);
             if (isTrue == _ERROR) { 
                 done = 1;
                 break;
             }
+            
+            if (mode) wait_key(mode);
+            deselectBlk(cblk);
+            drawBlk(cblk);
 
             if (isTrue != 0) {
                 if (cblk.next != -1) {
@@ -175,19 +206,11 @@ void runInterpretor() {
         }
         
     }
+
+    cout << "\n";
 }
     
 bool iskeypressed() {
-    if (kbhit()) {
-        char key = getch();
-        if (key == 'r') {
-            regSize = 0;
-            runInterpretor();
-            cout << "\n";
-        }
-        return 1;
-    }
-    return 0;
 }
 
 #endif

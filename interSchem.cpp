@@ -15,25 +15,26 @@ using namespace std;
 #include "Generarecod.h"
 #include "blk.h"
 #include "interpretor.h"
+#include "export.h"
 
 int main() {
-    initwindow(width, height);
-    createBlk(START, 500, 100);
-    createBlk(DECISION, 400, 300, "4*5==20&&(6-7==-2||!0)");
-    createBlk(STOP, 200, 500);
-    createBlk(STOP, 600, 500);
-
-    b[0].next = 1;
-    b[1].next = 2;
-    b[1].nextF = 3;
-
+    initwindow(width, height, "InterSchem");
+    char file_name[30] = "fibonacci.sch";
+    import_scheme(file_name);
     drawScheme();
-    
+     
     while (1) {
-        if (iskeypressed()) {
-        
+        if (kbhit()) {
+            switch (getch()) {
+                case 'r':
+                    runInterpretor();
+                    break;
+                case 'e':
+                    export_scheme(file_name);
+                    break;
+            }
         }
-        if (ismouseclick(WM_LBUTTONDBLCLK)) {
+        else if (ismouseclick(WM_LBUTTONDBLCLK)) {
             doubleLeftClick();
         }
         else if (ismouseclick(WM_LBUTTONDOWN)) {
@@ -46,6 +47,7 @@ int main() {
         else if (ismouseclick(WM_RBUTTONDOWN)) {
             rightClick();
         }
+
         delay(2 * DELAY);
     }
     

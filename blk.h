@@ -41,7 +41,7 @@ void createBlk(char type, int x, int y, string cont = "") {
     else if(type == WRITE)
         bl.container = "WRITE";
     */
-    bl.color = BLK_STROKE;
+    //bl.color = BLK_STROKE;
     bl.next = -1;
     bl.nextF = -1;
     blkSize++;
