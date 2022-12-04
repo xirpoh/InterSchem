@@ -4,7 +4,7 @@
 //STRUCT CONSTS
 #define mxBLK 25
 #define mxCNT 30
-#define mxREG 10
+#define mxREG 20
 #define ENTER_KEY 13
 #define BACKSPACE_KEY 8
 #define maxLEN 50
@@ -33,5 +33,7 @@
 #define DECRIGHTBIAS 15
 #define OVERLAPBIAS 20
 #define BOUND_TXT 30
+#define HTXT LIGHTMAGENTA
+#define STEP_DELAY 100
 
 #endif
