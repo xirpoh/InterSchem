@@ -1,2 +1,2 @@
 # InterSchem
-<img src='images/if0.png' width='128'>
+<img src='images/fibonacci.png' width='512'>
