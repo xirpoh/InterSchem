@@ -1,2 +1,2 @@
 # InterSchem
-![My Image](images/if0.png)
+<img src='images/if0.png' width='128'>
