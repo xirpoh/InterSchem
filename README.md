@@ -1,2 +1,2 @@
 # InterSchem
-<img src="https://imgur.com/a/3kVkxOw"></img>
+![alt text](https://imgur.com/a/3kVkxOw)
