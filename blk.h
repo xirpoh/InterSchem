@@ -452,7 +452,7 @@ void leftClick() {
         bl.color = YELLOW;
         drawBlk(bl);
 
-        int dx = bl.x - mx, dy = bl.y - my;
+        int dx = bl.x - mx, dy = bl.y - my, mx1 = mx, my1 = my;
         while (!ismouseclick(WM_LBUTTONUP)) {
             if (mousex() + dx == bl.x && mousey() + dy == bl.y)
                 continue;

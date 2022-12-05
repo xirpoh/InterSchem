@@ -7,6 +7,7 @@
 #define mxREG 20
 #define ENTER_KEY 13
 #define BACKSPACE_KEY 8
+#define ESCAPE_KEY 27
 #define maxLEN 50
 
 //BLOCK IDS

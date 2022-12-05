@@ -1,8 +1,19 @@
 #ifndef __EXPORT_H__
 #define __EXPORT_H__
 
-void export_scheme(char* file_name) {
-    FILE* fp = fopen(file_name, "w");
+void export_scheme(char* file_path = NULL) {
+    char file_name[30];
+    if (file_path == NULL) {
+        cout << "Save scheme as: ";
+        scanf("%s", &file_name);
+    }
+    else 
+        strcpy(file_name, file_path);
+    
+    char folder[30] = "schemes\\";
+    strcat(folder, file_name);
+
+    FILE* fp = fopen(folder, "w");
     fprintf(fp, "%d\n", blkSize);
 
     for (int i = 0; i < blkSize; i++) {
@@ -18,8 +29,25 @@ void export_scheme(char* file_name) {
     fclose(fp);
 }
 
-void import_scheme(char* file_name) {
-    FILE* fp = fopen(file_name, "r");
+void import_scheme(char* file_path = NULL) {
+    char file_name[30];
+    if (file_path == NULL) {
+        cout << "Open scheme: ";
+        scanf("%s", &file_name);
+    }
+    else 
+        strcpy(file_name, file_path);
+    
+    char folder[30] = "schemes\\";
+    strcat(folder, file_name);
+
+    FILE* fp = fopen(folder, "r");
+
+    if (fp == NULL) {
+        cout << "File failed to open\n";
+        return;
+    }
+
     fscanf(fp, "%d\n", &blkSize);
     
     char line[255];
@@ -39,6 +67,7 @@ void import_scheme(char* file_name) {
     }
 
     fclose(fp);
+    drawScheme();
 }
 
 #endif

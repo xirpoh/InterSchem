@@ -18,8 +18,10 @@ int get_reg_idx(string name) {
 #include "expression_eval.h"
 
 string remove_spaces(string str) {
-    string s = str;
-    remove(s.begin(), s.end(), ' ');
+    string s = "";
+    for (int i = 0; i < str.size(); i++)
+        if (str[i] != ' ')
+            s += str[i];
     return s;
 }
 
@@ -47,7 +49,6 @@ int run_decision_blk(blk& bl) {
 
 void run_expression_blk(blk& bl) {
     string instr = remove_spaces(bl.container);
-    //cout << instr << "\n";
     int eq = instr.find('=');
     string var_name = instr.substr(0, eq);
     instr = instr.substr(eq + 1, instr.size() - eq - 1);
@@ -210,8 +211,5 @@ void runInterpretor() {
     cout << "\n";
 }
     
-bool iskeypressed() {
-}
-
 #endif
 

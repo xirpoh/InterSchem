@@ -7,7 +7,6 @@
 #include <math.h>
 #include <vector>
 #include <stack>
-#include <algorithm>
 using namespace std;
 
 #include "config.h"
@@ -19,8 +18,7 @@ using namespace std;
 
 int main() {
     initwindow(width, height, "InterSchem");
-    char file_name[30] = "fibonacci.sch";
-    import_scheme(file_name);
+    //import_scheme((char*)"fibonacci.sch");
     drawScheme();
      
     while (1) {
@@ -29,9 +27,15 @@ int main() {
                 case 'r':
                     runInterpretor();
                     break;
-                case 'e':
-                    export_scheme(file_name);
+                case 's':
+                    export_scheme();
                     break;
+                case 'o':
+                    import_scheme();
+                    break;
+                case ESCAPE_KEY:
+                    closegraph();
+                    return 0;
             }
         }
         else if (ismouseclick(WM_LBUTTONDBLCLK)) {

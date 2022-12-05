@@ -171,8 +171,8 @@ float evalPostfix(TokenList& tl) {
         else if (tl.token[i].id == VAR) {
             float* reg = get_reg(tl.token[i].str);
             if (reg == NULL) {
-                values.push(0);
-                continue;
+                cout << "error: " << tl.token[i].str << " was not declared";
+                return _ERROR;
             }
             if (tl.token[i + 1].str == "incr")
                 *reg += 1;
