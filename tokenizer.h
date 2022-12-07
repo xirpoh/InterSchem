@@ -86,9 +86,9 @@ void tokenize(string expr, TokenList& tl) {
             tl.num_tokens++;
             --i;
         }
-        else if (isalpha(expr[i])) {
+        else if (isalpha(expr[i]) || expr[i] == '_') {
             int j = i, len = 0;
-            while (isalpha(expr[i]) || isdigit(expr[i]))
+            while (isalpha(expr[i]) || isdigit(expr[i]) || expr[i] == '_')
                 i++, len++;
 
             tl.token[tl.num_tokens].id = (expr[i] == '(') ? FUNC : VAR;

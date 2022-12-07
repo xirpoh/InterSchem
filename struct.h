@@ -10,6 +10,7 @@ struct blk {
     string container;
 
     int next, nextF;
+    int id;
 };
 
 struct ifentry {
@@ -44,8 +45,9 @@ int usize = 0;
 
 bool vizitat[mxBLK*2] = { 0 };
 
-//cnnt c[mxCNT];
-//int cnntSize = 0;
+int drawntofr[mxBLK] = { 0 };
+int drawntofl[mxBLK] = { 0 };
+bool ignorewhendrawingines[mxBLK] = { 0 };
 
 reg r[mxREG];
 int regSize = 0;

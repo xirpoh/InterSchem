@@ -145,7 +145,7 @@ string pathtostring(int wid) {
 void tabulation(int tablevel) {
 	for (int i = 0; i < tablevel; i++) {
 		cout << "  ";
-	} {}
+	}
 }
 bool EuEntry(int id, int branch = 0) {
 	for (auto a : uEntries) {
@@ -154,7 +154,7 @@ bool EuEntry(int id, int branch = 0) {
 	return 0;
 }
 bool isused(int id, int branch = 0, bool deb = 0) {
-	if (deb) cout << "id " << id  << ' ';
+	if (deb) cout << "id " << id << ' ';
 	if (b[id].type != DECISION) {
 		if (branch == 1) return 1;
 		if (EuEntry(id, branch)) {
@@ -193,7 +193,7 @@ void adduentry(int id, bool branch = 0) {
 }
 void thecode(int id, int tablevel = 0, bool deb = 0) {
 	deb = 0;
-	if (b[id].type == START|| b[id].type == STOP) {
+	if (b[id].type == START || b[id].type == STOP) {
 		adduentry(id);
 		thecode(b[id].next, tablevel, deb);
 		return;
@@ -233,7 +233,7 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 				tabulation(tablevel);
 				cout << "}\n";
 				tabulation(tablevel);
-				cout << "while(" << pathtostring(wid) << ");\n";
+				cout << "while(" << pathtostring(wid) << ")\n";
 			}
 			else if (deb) cout << "<used>\n";
 			return;
@@ -252,7 +252,7 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 				cout << "}\n";
 				if (!u2dec) {
 					tabulation(tablevel);
-					cout << "else" <<"{\n";
+					cout << "else" << "{\n";
 					thecode(b[id].nextF, tablevel + 1, deb);
 					tabulation(tablevel);
 					cout << "}\n";
@@ -268,7 +268,7 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 				cout << "}\n";
 				if (!u1dec) {
 					tabulation(tablevel);
-					cout << "else"<< "{\n";
+					cout << "else" << "{\n";
 					thecode(b[id].next, tablevel + 1, deb);
 					tabulation(tablevel);
 					cout << "}\n";
@@ -295,9 +295,9 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 				if (deb) cout << "<write||expr>\n";
 				adduentry(id);
 				tabulation(tablevel);
-				if (b[id].type == WRITE) cout << "cout<<";
+				if (b[id].type == WRITE) cout << "cout<<(";
 				cout << b[id].container;
-				//if (b[id].type == WRITE) cout << ")";
+				if (b[id].type == WRITE) cout << ")";
 				cout << ";\n";
 
 				if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) ||
@@ -339,7 +339,97 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 		}
 	}
 }
+int isconstant(string s, int current) {
+	int end = current - 1;
+
+	for (int i = current; i < s.size(); i++) {
+		if (s[i] > 47 && s[i] < 58) end++;
+		else break;
+	}
+	return end;
+}
+int isvariable(string s, int current) {
+	int end = current - 1;
+	string var = "";
+	for (int i = current; i < s.size(); i++) {
+		if ((s[i] >= 65 && s[i] <= 90) ||
+			(s[i] >= 97 && s[i] <= 122)) {
+			end++; var += s[i];
+		}
+		else break;
+	}
+	if (end == -1) return end;
+	for (int i = 0; i < mxBLK; i++) {
+		if (b[i].type == READ && b[i].container == var) return end;
+	}
+	return -1;
+}
+void scriesequence(string sequence, int lp, int rp) {
+	for (int i = lp; i <= rp; i++) {
+		cout << sequence[i];
+	}
+}
+void scriecod(string sequence, string filename = "", bool mod = 0) {
+	int lp = 0, rp = 0;
+	cout << sequence.size();
+	if (filename != "") {
+
+	}
+	else {
+		if (sequence[0] == '"' && sequence[sequence.size() - 1] == '"') {
+			cout << "\033[0;31m" << sequence << "\033[0m\n";
+			return;
+		}
+		while (lp < sequence.size()) {
+			if ((rp = isconstant(sequence, lp)) != lp - 1) {
+				cout << "const\n";
+				scriesequence(sequence, lp, rp);
+				printf("Lp: %d, rp: %d\n", lp, rp);
+				lp++;
+			}
+			else if ((rp = isvariable(sequence, lp)) != lp - 1) {
+				cout << "var\n";
+				scriesequence(sequence, lp, rp);
+				printf("Lp: %d, rp: %d\n", lp, rp);
+				lp++;
+			}
+			else {
+				rp = lp - 1;
+				cout << "else\n";
+				while (isconstant(sequence, rp + 1) == lp - 1 &&
+					isvariable(sequence, rp + 1) == lp - 1) {
+					rp++;
+				}
+				scriesequence(sequence, lp, rp);
+
+				printf("Lp: %d, rp: %d\n", lp, rp);
+				lp = rp + 1;
+			}
+		}
+
+	}
+}
 void thecodelaunch(int id, bool deb = 0) {
+
+	string cppform = "#include <iostream>\nusing namespace std;\n\nint main(){\n";
+	vector<int> variables;
+	string variablesline = "";
+	for (int i = 0; i < blkSize; i++) {
+		if (b[i].type == READ) {
+			variables.push_back(i);
+		}
+	}
+	if (variables.size() != 0) {
+		variablesline += "float ";
+		for (int i = 0; i < variables.size(); i++) {
+			variablesline += b[variables[i]].container;
+			if (i < variables.size() - 1) variablesline += ", ";
+		}
+		variablesline += ";";
+	}
+	cout << cppform;
+	tabulation(1);
+	cout << variablesline << '\n';
 	vector<ifentry>* v = new vector<ifentry>;
 	cautawhileentries(id, *v, 0);
 	for (int i = 0; i < blkSize; i++) {
@@ -359,7 +449,10 @@ void thecodelaunch(int id, bool deb = 0) {
 	for (auto a : uEntries) {
 		if (deb) cout << a.id << ' ' << a.branch << '\n';
 	}
-	thecode(id, 0, 0);
+	thecode(id, 1, 0);
+	cout << '\n';
+	tabulation(1);
+	cout << "return 0;\n}";
 	if (deb) cout << "finish\n";
 }
 bool button() {

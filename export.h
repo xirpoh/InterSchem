@@ -9,6 +9,8 @@ void export_scheme(char* file_path = NULL) {
     }
     else 
         strcpy(file_name, file_path);
+
+    strcpy(scheme_name, file_name);
     
     char folder[30] = "schemes\\";
     strcat(folder, file_name);
@@ -24,9 +26,11 @@ void export_scheme(char* file_path = NULL) {
         fprintf(fp, "%d %d\n", b[i].x, b[i].y);
         fprintf(fp, "%d %d\n", b[i].w, b[i].h);
         fprintf(fp, "%d %d\n", b[i].next, b[i].nextF);
+        fprintf(fp, "%d\n", b[i].id);
     }
-
+    
     fclose(fp);
+    drawScheme();
 }
 
 void import_scheme(char* file_path = NULL) {
@@ -37,6 +41,8 @@ void import_scheme(char* file_path = NULL) {
     }
     else 
         strcpy(file_name, file_path);
+    
+    strcpy(scheme_name, file_name);
     
     char folder[30] = "schemes\\";
     strcat(folder, file_name);
@@ -64,6 +70,7 @@ void import_scheme(char* file_path = NULL) {
         fscanf(fp, "%d %d\n", &b[i].x, &b[i].y);
         fscanf(fp, "%d %d\n", &b[i].w, &b[i].h);
         fscanf(fp, "%d %d\n", &b[i].next, &b[i].nextF);
+        fscanf(fp, "%d\n", &b[i].id);
     }
 
     fclose(fp);

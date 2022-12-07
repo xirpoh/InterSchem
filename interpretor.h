@@ -65,13 +65,13 @@ void run_expression_blk(blk& bl) {
 
 void run_read_blk(blk& bl) {
     string instr = remove_spaces(bl.container);
-    if (!isalpha(instr[0])) {
-        cout << "Variable names need to start with with letters\n";
+    if (!isalpha(instr[0]) && instr[0] != '_') {
+        cout << "Variable names need to start witha a letter or with an underscore\n";
         return;
     }
     for (int i = 0; i < instr.size(); i++)
-        if (!isalpha(instr[i]) && !isdigit(instr[i])) {
-            cout << "Variable names can only contain letters and digits\n";
+        if (instr[i] != '_' && !isalpha(instr[i]) && !isdigit(instr[i])) {
+            cout << "Variable names can only contain letters, digits or the underscore\n";
             return;
         }
     
@@ -103,9 +103,12 @@ void run_write_blk(blk& bl) {
 }
 
 void drawNextCnnt(blk& b1, blk& b2, bool brnch = 0) {
-    drawaux(b1, b2, LIGHTMAGENTA, b1.type, brnch);
+    //drawaux(b1, b2, LIGHTMAGENTA, b1.type, b1.id, brnch);
+    //delay(STEP_DELAY);
+    //drawaux(b1, b2, BLK_STROKE, b1.type, b1.id, brnch);
+    drawCnnt(BLK_STROKE, b1.id, brnch, LIGHTMAGENTA);
     delay(STEP_DELAY);
-    drawaux(b1, b2, BLK_STROKE, b1.type, brnch);
+    drawCnnt(BLK_STROKE, b1.id, brnch, BLK_STROKE);
 }
 
 void wait_key(int& mode) {

@@ -1,6 +1,8 @@
 #ifndef __BLK_H__
 #define __BLK_H__
 
+char scheme_name[50] = "untitled.sch";
+
 char* stringToChar(string s) {
     char* c = (char*)malloc(s.size() + 1);
     int i = 0;
@@ -30,21 +32,10 @@ void createBlk(char type, int x, int y, string cont = "") {
     else
         bl.container = cont;
     
-    resizeBlk(bl);
-
-    /*else if (type == DECISION)
-        bl.container = "IF";
-    else if(type == EXPR)
-        bl.container = "EXPR";
-    else if(type == READ)
-        bl.container = "READ";
-    else if(type == WRITE)
-        bl.container = "WRITE";
-    */
-    //bl.color = BLK_STROKE;
+    resizeBlk(bl); 
     bl.next = -1;
     bl.nextF = -1;
-    blkSize++;
+    bl.id = blkSize++;
 }
 
 void blkconn(int& x, int& y, blk b, int br = 0) {
@@ -136,7 +127,6 @@ void _drawBlk(blk b) {
     free(txt);
 }
 
-
 void drawBlk(blk& b) {
     setcolor(b.color);
     _drawBlk(b);
@@ -146,268 +136,21 @@ void clearBlk(blk b) {
     setcolor(0);
     _drawBlk(b);
 }
-int cadran(blk& b1, blk& b2) {
-
-    int cx1, cy1, cx2, cy2, coltx1, coltx2;
-    if ((b1.type == START || b1.type == EXPR || b1.type == READ || b1.type == WRITE)) {
-
-        cx1 = b1.x + b1.w / 2;
-        cy1 = b1.y + b1.h;
-        cx2 = b2.x + b2.w / 2;
-        cy2 = b2.y;
-
-
-        //1
-        if (cx2 > cx1 && cy2 < cy1) {
-            coltx1 = b1.x + b1.w;
-            coltx2 = b2.x;
-            if (coltx1 < coltx2) return 10;
-            else return 11;
-        }
-        //4
-        if (cx2 > cx1 && cy2 > cy1) {
-            coltx1 = b1.x + b1.w;
-            coltx2 = b2.x;
-            if (coltx1 < coltx2) return 40;
-            else return 41;
-        }
-        //2
-        if (cx2 < cx1 && cy2 < cy1) {
-            coltx1 = b1.x;
-            coltx2 = b2.x + b2.w;
-            if (coltx1 > coltx2) return 20;
-            else return 21;
-        }
-        //3
-        if (cx2 < cx1 && cy2 > cy1) {
-            coltx1 = b1.x;
-            coltx2 = b2.x + b2.w;
-            if (coltx1 > coltx2) return 30;
-            else return 31;
-        }
-    }
-    else {
-        cx1 = b1.x + b1.w / 2;
-        cy1 = b1.y + b1.h;
-        cx2 = b2.x + b2.w / 2;
-        cy2 = b2.y;
-
-
-        //1
-        if (cx2 > cx1 && cy2 < cy1) {
-            coltx1 = b1.x + b1.w;
-            coltx2 = b2.x;
-            if (coltx1 < coltx2) return 10;
-            else return 11;
-        }
-        //4
-        if (cx2 > cx1 && cy2 > cy1) {
-            coltx1 = b1.x + b1.w;
-            coltx2 = b2.x;
-            if (coltx1 < coltx2) return 40;
-            else return 41;
-        }
-        //2
-        if (cx2 < cx1 && cy2 < cy1) {
-            coltx1 = b1.x;
-            coltx2 = b2.x + b2.w;
-            if (coltx1 > coltx2) return 20;
-            else return 21;
-        }
-        //3
-        if (cx2 < cx1 && cy2 > cy1) {
-            coltx1 = b1.x;
-            coltx2 = b2.x + b2.w;
-            if (coltx1 > coltx2) return 30;
-            else return 31;
-        }
-    }
-}
-void drawlines(int p0x, int p0y, int p1x, int p1y,
-    int p2x, int p2y, int p3x, int p3y, int p4x, int p4y, int p5x = 0, int p5y = 0) {
-    if (p5x == 0) {
-        line(p0x, p0y, p1x, p1y);
-        line(p1x, p1y, p2x, p2y);
-        line(p2x, p2y, p3x, p3y);
-        line(p3x, p3y, p4x, p4y);
-    }
-    else {
-        line(p0x, p0y, p5x, p5y);
-        line(p5x, p5y, p1x, p1y);
-        line(p1x, p1y, p2x, p2y);
-        line(p2x, p2y, p3x, p3y);
-        line(p3x, p3y, p4x, p4y);
-    }
-
-}
-void drawaux(blk& b1, blk& b2, int color, int type, bool side) {
-    int caz;
-    caz = cadran(b1, b2);
-    int p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y = 0, p5x, p5y;
-    if (type == 3) {
-        if (side == 0) {
-            p5x = b1.x;
-            p5y = b1.y + b1.h + DECRIGHTBIAS;
-            p0x = b1.x;
-            p0y = b1.y + b1.h / 2;
-        }
-        else {
-            p5x = b1.x + b1.w;
-            p5y = b1.y + b1.h + DECRIGHTBIAS;
-            p0x = b1.x + b1.w;
-            p0y = b1.y + b1.h / 2;
-        }
-    }
-    else {
-        p0x = b1.x + b1.w / 2;
-        p0y = b1.y + b1.h;
-    }
-    if (caz % 10 == 0) {
-        if (caz / 10 == 1) {
-            p1x = b1.x + b1.w + (b2.x - b1.x - b1.w) / 2;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-        else if (caz / 10 == 4) {
-            p1x = b1.x + b1.w + (b2.x - b1.x - b1.w) / 2;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-        else if (caz / 10 == 2) {
-            p1x = b2.x + b2.w + (b1.x - b2.x - b2.w) / 2;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-        else if (caz / 10 == 3) {
-            p1x = b2.x + b2.w + (b1.x - b2.x - b2.w) / 2;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-    }
-    else {
-        if (caz / 10 == 1) {
-            p1x = b1.x + b1.w + OVERLAPBIAS;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-        else if (caz / 10 == 4) {
-            p1x = b1.x + b1.w + OVERLAPBIAS;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-        else if (caz / 10 == 2) {
-            p1x = b1.x - OVERLAPBIAS;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-        else if (caz / 10 == 3) {
-            p1x = b2.x - OVERLAPBIAS;
-            p1y = b1.y + b1.h + DECRIGHTBIAS;
-            p2x = p1x;
-            p2y = b2.y - DECRIGHTBIAS;
-            p3y = p2y;
-            p3x = b2.x + b2.w / 2;
-            p4x = p3x;
-            p4y = b2.y;
-        }
-    }
-    setcolor(color);
-    if (p4y != 0) {
-        if (b1.type == DECISION) {
-            drawlines(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, p5x, p5y);
-        }
-        else drawlines(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y);
-    }
-
-}
-
-void drawCnnt_old(int color) {
-    setcolor(color);
-    for (int i = 0; i < blkSize; i++) {
-        if (b[i].next > 0) {
-            blk& b1 = b[i];
-            blk& b2 = b[b[i].next];
-            if (b1.type == DECISION)
-                line(b1.x, b1.y + b1.h / 2, b2.x + b2.w / 2, b2.y);
-            else
-                line(b1.x + b1.w / 2, b1.y + b1.h, b2.x + b2.w / 2, b2.y);
-
-        }
-        if (b[i].nextF > 0) {
-            blk& b1 = b[i];
-            blk& b2 = b[b[i].nextF];
-            line(b1.x + b1.w, b1.y + b1.h / 2, b2.x + b2.w / 2, b2.y);
-        }
-    }
-
-}
-
-void drawCnnt(int color) {
-    int caz;
-    for (int i = 0; i < blkSize; i++) {
-        if (b[i].next > 0) {
-            if (b[i].type == START || b[i].type == EXPR || b[i].type == READ || b[i].type == WRITE) {
-                blk& b1 = b[i];
-                blk& b2 = b[b[i].next];
-
-                drawaux(b1, b2, color, 0, 0);
-            }
-            else {
-                blk& b1 = b[i];
-                blk& b2 = b[b[i].next];
-
-                drawaux(b1, b2, color, DECISION, 0);
-            }
-        }
-        if (b[i].nextF > 0) {
-            blk& b1 = b[i];
-            blk& b2 = b[b[i].nextF];
-            drawaux(b1, b2, color, DECISION, 1);
-        }
-    }
-
-}
 
 void drawScheme() {
     cleardevice();
     drawCnnt(BLK_STROKE);
     for (int i = 0; i < blkSize; i++)
         drawBlk(b[i]);
+    
+    setcolor(WHITE);
+    outtextxy(BOUND_TXT, height - 2 * BOUND_TXT - textheight(scheme_name), scheme_name);
+}
+
+void resetScheme() {
+    blkSize = 0;
+    strcpy(scheme_name, "untitled.sch");
+    drawScheme();
 }
 
 bool btween(int a, int b, int c) {
@@ -451,13 +194,13 @@ void leftClick() {
         blk& bl = b[idx];
         bl.color = YELLOW;
         drawBlk(bl);
+        drawCnnt(BG);
 
-        int dx = bl.x - mx, dy = bl.y - my, mx1 = mx, my1 = my;
+        int dx = bl.x - mx, dy = bl.y - my;
         while (!ismouseclick(WM_LBUTTONUP)) {
             if (mousex() + dx == bl.x && mousey() + dy == bl.y)
                 continue;
-
-            drawCnnt(BG);
+             
             clearBlk(bl);
 
             blk cpy = bl;
@@ -467,11 +210,11 @@ void leftClick() {
             if (areBlksInter(idx))
                 bl = cpy;
 
-            setcolor(BLACK);
-            drawCnnt(BLK_STROKE);
+            setcolor(BLACK); 
             drawBlk(bl);
             delay(DELAY);
         }
+        drawCnnt(BLK_STROKE);
 
         deselectBlk(bl);
         drawBlk(bl);
@@ -556,9 +299,11 @@ void removeBlk(int idx) {
     }
     delay(ANIM_DELAY);
     clearBlk(b[idx]);
-
-    for (int i = idx + 1; i < blkSize; i++)
+    for (int i = idx + 1; i < blkSize; i++) {
+        b[i].id--;
         b[i - 1] = b[i];
+    }
+
     blkSize--;
 
     for (int i = 0; i < blkSize; i++) {
@@ -570,8 +315,8 @@ void removeBlk(int idx) {
             b[i].next--;
         if (b[i].nextF > idx)
             b[i].nextF--;
-    }
 
+    }
     drawScheme();
 }
 
@@ -580,45 +325,47 @@ bool removeCnnt(int mx, int my) {
         if (b[i].type == START || b[i].type == EXPR || b[i].type == READ || b[i].type == WRITE) {
             int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
-                drawaux(b[i], b[b[i].next], RED, 0, 0);
+                drawCnnt(WHITE, i, 0,RED);
                 while (!ismouseclick(WM_RBUTTONUP)) {
                     delay(DELAY);
                 }
                 delay(ANIM_DELAY);
-                drawaux(b[i], b[b[i].next], 0, 0, 0);
+                drawCnnt(BG);
                 b[i].next = -1;
+                drawCnnt(WHITE);
                 return 1;
             }
         }
         else if (b[i].type == DECISION) {
             int cx = b[i].x, cy = b[i].y + b[i].h / 2;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
-                drawaux(b[i], b[b[i].next], RED, DECISION, 0);
+                drawCnnt(WHITE, i, 0,RED);
                 while (!ismouseclick(WM_RBUTTONUP)) {
                     delay(DELAY);
                 }
-                delay(ANIM_DELAY);
-                drawaux(b[i], b[b[i].next], 0, DECISION, 0);
+                drawCnnt(BG);
                 b[i].next = -1;
+                drawCnnt(WHITE);
+
                 return 1;
             }
 
             cx = b[i].x + b[i].w, cy = b[i].y + b[i].h / 2;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
-                drawaux(b[i], b[b[i].nextF], RED, DECISION, 1);
+                drawCnnt(WHITE, i, 1,RED);
                 while (!ismouseclick(WM_RBUTTONUP)) {
                     delay(DELAY);
                 }
                 delay(ANIM_DELAY);
-                drawaux(b[i], b[b[i].nextF], 0, DECISION, 1);
+                drawCnnt(BG);
                 b[i].nextF = -1;
+                drawCnnt(WHITE);
                 return 1;
             }
         }
 
     return 0;
 }
-
 void rightClick() {
     int mx = mousex(), my = mousey();
 
@@ -634,16 +381,20 @@ void rightClick() {
         removeBlk(idx);
     }
     else {
-        char type = max(1, min(getch() - '0', 6));
-
-        createBlk(type, mousex(), mousey());
+        char type;
+        while (1) {
+            type = getch();
+            if (type > 48 && type < 55) break;
+            else delay(10);
+        }
+        createBlk(type - 48, mx, my);
         blk& bl = b[blkSize - 1];
 
         if (areBlksInter(blkSize - 1))
             blkSize--;
         else {
-            drawBlk(bl);
-            if (bl.type != START && bl.type != STOP)
+            drawBlk(bl); 
+	    if (bl.type != START && bl.type != STOP)
                 writeContainer(bl);
         }
     }
@@ -680,6 +431,7 @@ bool mouseHoverEvent(int source, int cx, int cy, int br = 0) {
         setcolor(WHITE);
         circle(cx, cy, CNNT_R);
         clearmouseclick(WM_LBUTTONDOWN);
+        drawCnnt(BG);
         return 1;
     }
     return 0;
@@ -720,8 +472,6 @@ void doubleLeftClick() {
         writeContainer(b[idx]);
     }
     clearmouseclick(WM_LBUTTONDBLCLK);
-
 }
 
 #endif
-

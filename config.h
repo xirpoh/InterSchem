@@ -29,7 +29,7 @@
 #define CNNT_R 7     
 #define EDGE_R 7
 #define BG 0
-#define BOUND 10
+#define BOUND 21 
 #define DECLEFTBIAS 10
 #define DECRIGHTBIAS 15
 #define OVERLAPBIAS 20
@@ -37,4 +37,6 @@
 #define HTXT LIGHTMAGENTA
 #define STEP_DELAY 50
 
+#define c3c4side 15
+#define c1c2side 20
 #endif

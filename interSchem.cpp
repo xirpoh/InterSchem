@@ -12,6 +12,7 @@ using namespace std;
 #include "config.h"
 #include "struct.h"
 #include "Generarecod.h"
+#include "ConnectorsDrawing.h"
 #include "blk.h"
 #include "interpretor.h"
 #include "export.h"
@@ -20,7 +21,7 @@ int main() {
     initwindow(width, height, "InterSchem");
     //import_scheme((char*)"fibonacci.sch");
     drawScheme();
-     
+
     while (1) {
         if (kbhit()) {
             switch (getch()) {
@@ -32,6 +33,9 @@ int main() {
                     break;
                 case 'o':
                     import_scheme();
+                    break;
+                case 'n':
+                    resetScheme();
                     break;
                 case ESCAPE_KEY:
                     closegraph();
