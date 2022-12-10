@@ -80,7 +80,7 @@ void _drawBlk(blk b) {
     if (b.type == START) {
         //rectangle(b.x, b.y, b.x + b.w, b.y + b.h);
         roundedRect(b.x, b.y, b.x + b.w, b.y + b.h);
-        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BLACK);
+        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BG);
     }
     else if (b.type == STOP) {
         //rectangle(b.x, b.y, b.x + b.w, b.y + b.h);
@@ -96,8 +96,8 @@ void _drawBlk(blk b) {
         line(cx, cy, b.x, cy1 + CNNT_R);
         line(b.x, cy1 - CNNT_R, cx, b.y);
 
-        fillcircle(b.x, b.y + b.h / 2, CNNT_R, BLACK);
-        fillcircle(b.x + b.w, b.y + b.h / 2, CNNT_R, BLACK);
+        fillcircle(b.x, b.y + b.h / 2, CNNT_R, BG);
+        fillcircle(b.x + b.w, b.y + b.h / 2, CNNT_R, BG);
 
         outtextxy(b.x - 4, cy1 - 25, (char*)"T");
         outtextxy(cx1 - 4, cy1 - 25, (char*)"F");
@@ -105,21 +105,21 @@ void _drawBlk(blk b) {
     else if (b.type == EXPR) {
         //rectangle(b.x, b.y, b.x + b.w, b.y + b.h);
         roundedRect(b.x, b.y, b.x + b.w, b.y + b.h);
-        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BLACK);
+        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BG);
     }
     else if (b.type == READ) {
         line(b.x + BOUND, b.y, b.x + b.w - BOUND, b.y);
         line(b.x + b.w - BOUND, b.y, b.x + b.w, b.y + b.h);
         line(b.x + b.w, b.y + b.h, b.x, b.y + b.h);
         line(b.x, b.y + b.h, b.x + BOUND, b.y);
-        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BLACK);
+        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BG);
     }
     else if (b.type == WRITE) {
         line(b.x, b.y, b.x + b.w, b.y);
         line(b.x + b.w, b.y, b.x + b.w - BOUND, b.y + b.h);
         line(b.x + b.w - BOUND, b.y + b.h, b.x + BOUND, b.y + b.h);
         line(b.x + BOUND, b.y + b.h, b.x, b.y);
-        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BLACK);
+        fillcircle(b.x + b.w / 2, b.y + b.h, CNNT_R, BG);
     }
 
     outtextxy(b.x + b.w / 2 - textwidth(txt) / 2, b.y + b.h / 2 - textheight(txt) / 2, txt);
@@ -133,18 +133,21 @@ void drawBlk(blk& b) {
 }
 
 void clearBlk(blk b) {
-    setcolor(0);
+    setcolor(BG);
     _drawBlk(b);
 }
 
 void drawScheme() {
-    cleardevice();
-    drawCnnt(BLK_STROKE);
+    //cleardevice();
+    setfillstyle(SOLID_FILL, BG);
+    bar(0, 0, width, height);
+    readimagefile("images\\IDLE.jpg", width - 306, height - 70, width, height);
+    drawCnnt(CNNT_STROKE);
     for (int i = 0; i < blkSize; i++)
         drawBlk(b[i]);
     
     setcolor(WHITE);
-    outtextxy(BOUND_TXT, height - 2 * BOUND_TXT - textheight(scheme_name), scheme_name);
+    outtextxy(BOUND_TXT / 2, height - BOUND_TXT - textheight(scheme_name), scheme_name);
 }
 
 void resetScheme() {
@@ -184,6 +187,14 @@ bool areBlksInter(int j) {
     return 0;
 }
 
+bool isBlkInside(blk& bl) {
+    if (bl.x - BOUND < 0 || bl.y - BOUND < 0)
+        return 0;
+    if (bl.x + bl.w + BOUND > width || bl.y + bl.h + BOUND > height - BOUND_TXT)
+        return 0;
+    return 1;
+}
+
 void leftClick() {
     clearmouseclick(WM_LBUTTONDOWN);
     clearmouseclick(WM_LBUTTONUP);
@@ -194,7 +205,7 @@ void leftClick() {
         blk& bl = b[idx];
         bl.color = YELLOW;
         drawBlk(bl);
-        drawCnnt(BG);
+        //drawCnnt(BG);
 
         int dx = bl.x - mx, dy = bl.y - my;
         while (!ismouseclick(WM_LBUTTONUP)) {
@@ -202,19 +213,21 @@ void leftClick() {
                 continue;
              
             clearBlk(bl);
+            drawCnnt(BG);
 
             blk cpy = bl;
             bl.x = mousex() + dx;
             bl.y = mousey() + dy;
 
-            if (areBlksInter(idx))
+            if (areBlksInter(idx) || !isBlkInside(bl))
                 bl = cpy;
 
-            setcolor(BLACK); 
+            setcolor(BG); 
+            drawCnnt(CNNT_STROKE);
             drawBlk(bl);
             delay(DELAY);
         }
-        drawCnnt(BLK_STROKE);
+        //drawCnnt(CNNT_STROKE);
 
         deselectBlk(bl);
         drawBlk(bl);
@@ -228,9 +241,24 @@ void drawTextBlk(char* bar, blk& bl, int color) {
         bl.y + bl.h / 2 - textheight(bar) / 2, bar);
 }
 
+void drawText(char* txt, int x, int y, int color) {
+    setcolor(color);
+    outtextxy(x, y, txt);
+    setcolor(BG);
+}
+
+bool wait_key() {
+    for (int t = 0; t < KEY_WAIT; t++)
+        if (kbhit())
+            return 1;
+    return 0;
+}
+
 void writeContainer(blk& bl) {
-    char bar[maxLEN], key, tmp[2];
+    int x, y;
+    char bar[maxLEN], key, tmp[2], caret[2] = "_";
     bar[0] = '\0';
+    
     if (bl.container.size()) {
         char* txt = stringToChar(bl.container);
         strcpy(bar, txt);
@@ -240,9 +268,16 @@ void writeContainer(blk& bl) {
     drawTextBlk(bar, bl, HTXT);
 
     while (1) {
+        while (1) {
+            drawText(caret, bl.x + bl.w / 2 + textwidth(bar) / 2, bl.y + bl.h / 2 - textheight(caret) / 2, WHITE);
+            if (wait_key()) break;
+            drawText(caret, bl.x + bl.w / 2 + textwidth(bar) / 2, bl.y + bl.h / 2 - textheight(caret) / 2, BG);
+            if (wait_key()) break;
+        }
+
         int len = strlen(bar);
         key = getch();
-        if (key == ENTER_KEY)
+        if (key == ENTER_KEY || key == ESCAPE_KEY)
             break;
         else if (key == BACKSPACE_KEY) {
             if (bl.w > blkW && textwidth(bar) + 3 * BOUND_TXT < bl.w) {
@@ -251,13 +286,15 @@ void writeContainer(blk& bl) {
                 bl.x += BOUND_TXT / 2;
                 bl.w -= BOUND_TXT;
                 drawBlk(bl);
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
             }
 
             if (len) {
                 drawTextBlk(bar, bl, BG);
+                drawText(caret, bl.x + bl.w / 2 + textwidth(bar) / 2, bl.y + bl.h / 2 - textheight(caret) / 2, BG);
                 bar[len - 1] = '\0';
                 drawTextBlk(bar, bl, HTXT);
+                drawText(caret, bl.x + bl.w / 2 + textwidth(bar) / 2, bl.y + bl.h / 2 - textheight(caret) / 2, WHITE);
             }
 
             continue;
@@ -270,6 +307,7 @@ void writeContainer(blk& bl) {
         tmp[1] = '\0';
         strcat(bar, tmp);
         drawTextBlk(bar, bl, HTXT);
+        drawText(caret, bl.x + bl.w / 2 + textwidth(bar) / 2, bl.y + bl.h / 2 - textheight(caret) / 2, WHITE);
     
         if (textwidth(bar) + BOUND_TXT > bl.w) {
             clearBlk(bl);
@@ -277,11 +315,12 @@ void writeContainer(blk& bl) {
             bl.x -= BOUND_TXT;
             bl.w += BOUND_TXT * 2;
             drawBlk(bl);
-            drawCnnt(WHITE);
+            drawCnnt(CNNT_STROKE);
         }
         delay(DELAY);
     }
-
+    drawText(caret, bl.x + bl.w / 2 + textwidth(bar) / 2, bl.y + bl.h / 2 - textheight(caret) / 2, BG);
+    
     string cont(bar);
     bl.container = cont;
     drawBlk(bl);
@@ -325,41 +364,41 @@ bool removeCnnt(int mx, int my) {
         if (b[i].type == START || b[i].type == EXPR || b[i].type == READ || b[i].type == WRITE) {
             int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
-                drawCnnt(WHITE, i, 0,RED);
+                drawCnnt(CNNT_STROKE, i, 0, RED);
                 while (!ismouseclick(WM_RBUTTONUP)) {
                     delay(DELAY);
                 }
                 delay(ANIM_DELAY);
                 drawCnnt(BG);
                 b[i].next = -1;
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
                 return 1;
             }
         }
         else if (b[i].type == DECISION) {
             int cx = b[i].x, cy = b[i].y + b[i].h / 2;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
-                drawCnnt(WHITE, i, 0,RED);
+                drawCnnt(CNNT_STROKE, i, 0, RED);
                 while (!ismouseclick(WM_RBUTTONUP)) {
                     delay(DELAY);
                 }
                 drawCnnt(BG);
                 b[i].next = -1;
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
 
                 return 1;
             }
 
             cx = b[i].x + b[i].w, cy = b[i].y + b[i].h / 2;
             if (dist(mousex(), mousey(), cx, cy) < CNNT_R) {
-                drawCnnt(WHITE, i, 1,RED);
+                drawCnnt(CNNT_STROKE, i, 1, RED);
                 while (!ismouseclick(WM_RBUTTONUP)) {
                     delay(DELAY);
                 }
                 delay(ANIM_DELAY);
                 drawCnnt(BG);
                 b[i].nextF = -1;
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
                 return 1;
             }
         }
@@ -428,7 +467,7 @@ bool mouseHoverEvent(int source, int cx, int cy, int br = 0) {
         fillcircle(cx, cy, CNNT_R, YELLOW);
         createCnnt(source, br);
         fillcircle(cx, cy, CNNT_R, BG);
-        setcolor(WHITE);
+        setcolor(BLK_STROKE);
         circle(cx, cy, CNNT_R);
         clearmouseclick(WM_LBUTTONDOWN);
         drawCnnt(BG);
@@ -443,20 +482,20 @@ bool mouseHover() {
         if (b[i].type == START || b[i].type == EXPR || b[i].type == READ || b[i].type == WRITE) {
             int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
             if (mouseHoverEvent(i, cx, cy)) {
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
                 return 1;
             }
         }
         else if (b[i].type == DECISION) {
             int cx = b[i].x, cy = b[i].y + b[i].h / 2;
             if (mouseHoverEvent(i, cx, cy)) {
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
                 return 1;
             }
 
             cx = b[i].x + b[i].w, cy = b[i].y + b[i].h / 2;
             if (mouseHoverEvent(i, cx, cy, 1)) {
-                drawCnnt(WHITE);
+                drawCnnt(CNNT_STROKE);
                 return 1;
             }
         }

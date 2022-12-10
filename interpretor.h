@@ -66,7 +66,7 @@ void run_expression_blk(blk& bl) {
 void run_read_blk(blk& bl) {
     string instr = remove_spaces(bl.container);
     if (!isalpha(instr[0]) && instr[0] != '_') {
-        cout << "Variable names need to start witha a letter or with an underscore\n";
+        cout << "Variable names need to start with a letter or with an underscore\n";
         return;
     }
     for (int i = 0; i < instr.size(); i++)
@@ -106,27 +106,77 @@ void drawNextCnnt(blk& b1, blk& b2, bool brnch = 0) {
     //drawaux(b1, b2, LIGHTMAGENTA, b1.type, b1.id, brnch);
     //delay(STEP_DELAY);
     //drawaux(b1, b2, BLK_STROKE, b1.type, b1.id, brnch);
-    drawCnnt(BLK_STROKE, b1.id, brnch, LIGHTMAGENTA);
+    drawCnnt(CNNT_STROKE, b1.id, brnch, LIGHTMAGENTA);
     delay(STEP_DELAY);
-    drawCnnt(BLK_STROKE, b1.id, brnch, BLK_STROKE);
+    drawCnnt(CNNT_STROKE, b1.id, brnch, CNNT_STROKE);
+}
+
+char get_button_key(int mx, int my) {
+    clearmouseclick(WM_LBUTTONDOWN);
+    if (mx > width - intermW && mx < width &&
+        my > height - intermH && my < height) {
+        mx -= width - intermW;
+        my -= height - intermH;
+
+        int dw = intermW / 4;
+        string keys = "qnmf";
+        return keys[floor((float)mx / dw)];
+    }
+
+    return '%';
+}
+
+void interbutton(const char* image_name) {
+    readimagefile(image_name, width - intermW, height - intermH, width, height);
 }
 
 void wait_key(int& mode) {
     while (1) {
-        if (kbhit()) {
-            char key = getch();
-            if (key == 'n' || key == 'm') {
-                if (key == 'm')
+        if (ismouseclick(WM_LBUTTONDOWN)) {
+            char key = get_button_key(mousex(), mousey());
+            if (key != '%') {
+                if (key == 'm') {
                     mode = !mode;
+                    if (mode) {
+                        STEP_DELAY = SLOW_STEP;
+                        interbutton("images\\PAUSE.jpg");
+                        delay(ANIM_DELAY * 2);
+                        interbutton("images\\IDLE.jpg");
+                    }
+                    else { 
+                        STEP_DELAY = RUN_STEP;
+                        interbutton("images\\RUN.jpg");
+                    }
+                }
+                else if (key == 'n') {
+                    interbutton("images\\STEP.jpg");
+                    delay(ANIM_DELAY * 2);
+                    interbutton("images\\IDLE.jpg");
+                }
+                if (key == 'q') {
+                    interbutton("images\\STOP.jpg");
+                    delay(ANIM_DELAY * 2);
+                    interbutton("images\\IDLE.jpg");
+                    mode = 2;
+                }
+                if (key == 'f') {
+                    STEP_DELAY = FAST_STEP;
+                    interbutton("images\\FAST.jpg");
+                    mode = 0;
+                }
                 break;
             }
         }
     }
 }
 
-void runInterpretor() {
+void runInterpretor(int _mode) {
+    if (_mode)
+        interbutton("images\\STEP.jpg"), STEP_DELAY = SLOW_STEP;
+    else 
+        interbutton("images\\RUN.jpg"), STEP_DELAY = RUN_STEP; 
     regSize = 0;
-    int mode = 1;
+    int mode = _mode;
     int curr_blk = find_start_blk();
     if (curr_blk == -1) {
         cout << "<START block is missing>\n";
@@ -135,15 +185,34 @@ void runInterpretor() {
         
     blk cblk = b[curr_blk]; 
     bool done = 0;
-    while (!done) {
-        if (kbhit()) {
-            char key = getch();
+    while (!done && mode < 2) {
+        if (ismouseclick(WM_LBUTTONDOWN)) {
+            char key = get_button_key(mousex(), mousey());
             if (key == 'q') {
+                interbutton("images\\STOP.jpg");
+                delay(ANIM_DELAY * 2);
+                interbutton("images\\IDLE.jpg");
                 done = 1;
                 continue;
             }
-            if (key == 'm')
+            if (mode && key == 'm' || !mode && key == 'n') {
                 mode = !mode;
+                if (mode) {
+                    STEP_DELAY = SLOW_STEP;
+                    interbutton("images\\PAUSE.jpg");
+                    delay(ANIM_DELAY * 2);
+                    interbutton("images\\IDLE.jpg");
+                }
+                else { 
+                    STEP_DELAY = RUN_STEP;
+                    interbutton("images\\RUN.jpg");
+                }
+            }
+            if (key == 'f') {
+                STEP_DELAY = FAST_STEP;
+                interbutton("images\\FAST.jpg");
+                mode = 0;
+            }
         }
         
         clearBlk(cblk);
@@ -182,29 +251,30 @@ void runInterpretor() {
         
         if (cblk.type == DECISION) {
             int isTrue = run_decision_blk(cblk);
-            if (isTrue == _ERROR) { 
-                done = 1;
-                break;
-            }
             
             if (mode) wait_key(mode);
             deselectBlk(cblk);
             drawBlk(cblk);
+            
+            if (isTrue == _ERROR) { 
+                done = 1;
+                break;
+            }
 
             if (isTrue != 0) {
-                if (cblk.next != -1) {
+                if (cblk.next != -1 && mode < 2) {
                     drawNextCnnt(cblk, b[cblk.next]);
                     cblk = b[cblk.next];
                 }
             }
             else {
-                if (cblk.nextF != -1) {
+                if (cblk.nextF != -1 && mode < 2) {
                     drawNextCnnt(cblk, b[cblk.nextF], 1);
                     cblk = b[cblk.nextF];
                 }
             }
         }
-        else if (cblk.next != -1) { 
+        else if (cblk.next != -1 && mode < 2) { 
             drawNextCnnt(cblk, b[cblk.next]);
             cblk = b[cblk.next];
         }
@@ -212,7 +282,21 @@ void runInterpretor() {
     }
 
     cout << "\n";
+    interbutton("images\\IDLE.jpg");
 }
     
+bool interpretor_menu() {
+    char key = get_button_key(mousex(), mousey());
+    if (key == 'n') {
+        runInterpretor(1);
+        return 1;
+    }
+    if (key == 'm') {
+        runInterpretor(0);
+        return 1;
+    }
+    return 0;
+}
+
 #endif
 

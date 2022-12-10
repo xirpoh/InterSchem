@@ -22,21 +22,31 @@
 #define width  800
 #define height 800
 #define blkW  70
-#define blkH  40
+#define blkH 40
 #define DELAY 15
 #define ANIM_DELAY 100
-#define BLK_STROKE 15
+#define BLK_STROKE WHITE
+#define CNNT_STROKE WHITE 
 #define CNNT_R 7     
 #define EDGE_R 7
-#define BG 0
+#define BG BLACK
 #define BOUND 21 
 #define DECLEFTBIAS 10
 #define DECRIGHTBIAS 15
 #define OVERLAPBIAS 20
-#define BOUND_TXT 30
+#define BOUND_TXT 40//30
 #define HTXT LIGHTMAGENTA
-#define STEP_DELAY 50
+#define SLOW_STEP 200
+#define RUN_STEP 50
+#define FAST_STEP 10
+int STEP_DELAY = SLOW_STEP;
 
 #define c3c4side 15
 #define c1c2side 20
+#define KEY_WAIT 10000000
+
+#define intermW 306
+#define intermH 70
+
+
 #endif

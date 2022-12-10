@@ -19,14 +19,15 @@ using namespace std;
 
 int main() {
     initwindow(width, height, "InterSchem");
-    //import_scheme((char*)"fibonacci.sch");
+    import_scheme((char*)"fibonacci.sch");
     drawScheme();
+    line(width, 0, width, height);
 
     while (1) {
         if (kbhit()) {
             switch (getch()) {
                 case 'r':
-                    runInterpretor();
+                    runInterpretor(1);
                     break;
                 case 's':
                     export_scheme();
@@ -46,7 +47,10 @@ int main() {
             doubleLeftClick();
         }
         else if (ismouseclick(WM_LBUTTONDOWN)) {
-            if (button()) {
+            if (interpretor_menu()) {
+
+            }
+            else if (button()) {
                 debug(1);
             }
             else if (mouseHover() == 0)
