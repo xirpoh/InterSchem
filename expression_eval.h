@@ -3,10 +3,11 @@
 
 #include "tokenizer.h"
 
-#define NUM_FUNC 30
+#define NUM_FUNC 39
 #define NAME_LEN 15
 #define EPS 1e-5
 #define _ERROR -404
+
 
 double flipSign(double x) { return -x; }
 double keepSign(double x) { return x; }
@@ -14,20 +15,63 @@ double logicNot(double x) { return !((int)x != 0); }
 double bitwiseNot(double x) { return ~(int)x; }
 double incr(double x) { return x; };
 double decr(double x) { return x; };
+double random(double x) { return rand() % (int)x; }; 
+
+stack<float> stackA, stackB;
+double push(double x) { 
+    stackA.push(x); 
+    return 0; 
+};
+double pop(double x) { 
+    if (stackA.empty())
+        return 0;
+    double top = stackA.top(); 
+    stackA.pop();
+    return top;
+}
+double top(double x) {
+    if (stackA.empty())
+        return 0;
+    return stackA.top(); 
+}
+double empty(double) {
+    return stackA.empty();
+}
+double pushS(double x) { 
+    stackB.push(x); 
+    return 0; 
+};
+double popS(double x) { 
+    if (stackB.empty())
+        return 0;
+    double top = stackB.top(); 
+    stackB.pop();
+    return top;
+}
+double topS(double x) {
+    if (stackB.empty())
+        return 0;
+    return stackB.top(); 
+}
+double emptyS(double) {
+    return stackB.empty();
+}
 
 string func_names[NUM_FUNC + 1] = {"fabs", "exp", "log", "log2", "log10",
-                                       "sqrt", "cbrt", "sin", "cos", "tan", 
-                                       "asin", "acos", "atan", "sinh", 
-                                       "cosh", "tanh", "asinh", "acosh", "atanh", 
-                                       "ceil", "floor", "round", "trunc", "tgamma",
-                                       "flipSign", "keepSign", "logicNot", "bitwiseNot", "incr", "decr"};
+                                   "sqrt", "cbrt", "sin", "cos", "tan", 
+                                   "asin", "acos", "atan", "sinh", 
+                                   "cosh", "tanh", "asinh", "acosh", "atanh", 
+                                   "ceil", "floor", "round", "trunc", "tgamma",
+                                   "flipSign", "keepSign", "logicNot", "bitwiseNot", "incr", "decr", "random",
+                                   "push", "pushS", "pop", "popS", "top", "topS", "empty", "emptyS"};
 
 double (*p_func[NUM_FUNC + 1])(double) = {fabs, exp, log, log2, log10,
                                       sqrt, cbrt, sin, cos, tan, 
                                       asin, acos, atan, sinh,
                                       cosh, tanh, asinh, acosh, atanh,
                                       ceil, floor, round, trunc, tgamma, 
-                                      flipSign, keepSign, logicNot, bitwiseNot, incr, decr};
+                                      flipSign, keepSign, logicNot, bitwiseNot, incr, decr, random,
+                                      push, pushS, pop, popS, top, topS, empty, emptyS, random};
 
 float call_func(int func_idx, float arg) {
     return p_func[func_idx](arg);
@@ -186,8 +230,13 @@ float evalPostfix(TokenList& tl) {
             values.push(apply_operator(val1, val2, tl.token[i].op_id));
         }
         else if (tl.token[i].id == FUNC) {
-            float val = values.top(); values.pop();
             int func_idx = get_func_idx(tl.token[i].str);
+            if (func_idx >= 33) {
+                values.push(call_func(func_idx, 0));
+                continue;
+            }
+
+            float val = values.top(); values.pop();
             if (func_idx != _ERROR)
                 values.push(call_func(func_idx, val));
             else

@@ -1,6 +1,8 @@
 #ifndef __INTERPRETOR_H__
 #define __INTERPRETOR_H__
 
+#include <time.h>
+
 float* get_reg(string name) {
     for (int i = 0; i < regSize; i++)
         if (name == r[i].name)
@@ -147,7 +149,7 @@ void draw_regPanel(int color) {
         
         strcat(line, " <- ");
         strcat(line, val_buffer);
-        strcat(line, "    ");
+        strcat(line, "        ");
         outtextxy(varX, varY * (i + 1), line);
         free(line);
     }
@@ -213,6 +215,7 @@ void wait_key(int& mode) {
 }
 
 void runInterpretor(int _mode) {
+    srand(time(0));
     draw_regPanel(BG);
     if (_mode)
         interbutton("images\\STEP.jpg"), STEP_DELAY = SLOW_STEP;

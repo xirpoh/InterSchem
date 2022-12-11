@@ -19,16 +19,15 @@ using namespace std;
 
 int main() {
     initwindow(width, height, "InterSchem");
-    import_scheme((char*)"fibonacci.sch");
+    //import_scheme((char*)"stackSort.sch");
     drawScheme();
-    line(width, 0, width, height);
 
     while (1) {
         if (kbhit()) {
             switch (getch()) {
-                case 'r':
-                    runInterpretor(1);
-                    break;
+                //case 'r':
+                //    runInterpretor(1);
+                //    break;
                 case 's':
                     export_scheme();
                     break;

@@ -26,7 +26,7 @@
 #define DELAY 15
 #define ANIM_DELAY 100
 #define BLK_STROKE WHITE
-#define CNNT_STROKE WHITE 
+#define CNNT_STROKE MAGENTA 
 #define CNNT_R 7     
 #define EDGE_R 7
 #define BG BLACK
