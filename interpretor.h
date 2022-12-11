@@ -50,6 +50,30 @@ int run_decision_blk(blk& bl) {
 void run_expression_blk(blk& bl) {
     string instr = remove_spaces(bl.container);
     int eq = instr.find('=');
+
+    if (eq == -1) {
+        float res = expression_eval(instr); 
+        return;
+    }
+    
+    string comp_op[11] = {"+", "-", "**", "*", "//" , "/", "%", ">>", "<<", "&", "|"};
+    for (int i = 0; i < 11; i++) {
+        int pos = instr.find(comp_op[i]);
+        if (pos != -1 && pos < eq) {
+            string var_name = instr.substr(0, pos);
+            string _instr = instr.substr(pos + comp_op[i].size() + 1, instr.size() - pos - 1 + comp_op[i].size());
+            //cout << var_name << " " << _instr << "\n";
+            float *reg = get_reg(var_name);
+            if (reg != NULL) {
+                *reg = apply_operator(*reg, expression_eval(_instr), get_oprt_idx(comp_op[i]) + 1);
+            }
+            else {
+                cout << var_name << ": undeclared variable";
+            }
+            return;
+        }
+    }
+
     string var_name = instr.substr(0, eq);
     instr = instr.substr(eq + 1, instr.size() - eq - 1);
     float *reg = get_reg(var_name);
@@ -109,6 +133,24 @@ void drawNextCnnt(blk& b1, blk& b2, bool brnch = 0) {
     drawCnnt(CNNT_STROKE, b1.id, brnch, LIGHTMAGENTA);
     delay(STEP_DELAY);
     drawCnnt(CNNT_STROKE, b1.id, brnch, CNNT_STROKE);
+}
+
+void draw_regPanel(int color) {
+    setcolor(color);
+    int varX = width - 120, varY = 20;
+
+    for (int i = 0; i < regSize; i++) {
+        char* line = stringToChar(r[i].name);
+        
+        char val_buffer[20];
+        sprintf(val_buffer, "%g", floor(100 * r[i].val) / 100);
+        
+        strcat(line, " <- ");
+        strcat(line, val_buffer);
+        strcat(line, "    ");
+        outtextxy(varX, varY * (i + 1), line);
+        free(line);
+    }
 }
 
 char get_button_key(int mx, int my) {
@@ -171,6 +213,7 @@ void wait_key(int& mode) {
 }
 
 void runInterpretor(int _mode) {
+    draw_regPanel(BG);
     if (_mode)
         interbutton("images\\STEP.jpg"), STEP_DELAY = SLOW_STEP;
     else 
@@ -218,6 +261,7 @@ void runInterpretor(int _mode) {
         clearBlk(cblk);
         cblk.color = LIGHTGREEN;
         drawBlk(cblk);
+        draw_regPanel(WHITE);
         delay(STEP_DELAY);
         
         if(cblk.type == START) {
@@ -279,6 +323,8 @@ void runInterpretor(int _mode) {
             cblk = b[cblk.next];
         }
         
+        if (!done)
+            draw_regPanel(BG);
     }
 
     cout << "\n";
