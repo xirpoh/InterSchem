@@ -8,7 +8,6 @@
 #define EPS 1e-5
 #define _ERROR -404
 
-
 double flipSign(double x) { return -x; }
 double keepSign(double x) { return x; }
 double logicNot(double x) { return !((int)x != 0); }
@@ -248,6 +247,9 @@ float evalPostfix(TokenList& tl) {
 }
 
 float expression_eval(string expr) {
+    if (expr.empty())
+        return _ERROR;
+
     TokenList tl;
     tokenize(expr, tl);
     //print_TokenList(tl);

@@ -27,6 +27,12 @@ string remove_spaces(string str) {
     return s;
 }
 
+string remove_leading_spaces(string& str) {
+    int idx = 0;
+    while (str[idx] == ' ') idx++;
+    str = str.substr(idx, str.size() - idx);
+}
+
 int find_start_blk() {
     for (int i = 0; i < blkSize; i++)
         if (b[i].type == START)
@@ -39,7 +45,7 @@ void run_start_blk(blk& bl) {
 }
 
 void run_stop_blk(blk& bl) {
-    cout << "STOP\n";
+    cout << "\nSTOP\n";
 }
 
 int run_decision_blk(blk& bl) {
@@ -49,13 +55,12 @@ int run_decision_blk(blk& bl) {
     return _ERROR;
 }
 
-void run_expression_blk(blk& bl) {
-    string instr = remove_spaces(bl.container);
+bool _run_expression(string instr) {
     int eq = instr.find('=');
 
     if (eq == -1) {
         float res = expression_eval(instr); 
-        return;
+        return 1;
     }
     
     string comp_op[11] = {"+", "-", "**", "*", "//" , "/", "%", ">>", "<<", "&", "|"};
@@ -71,8 +76,9 @@ void run_expression_blk(blk& bl) {
             }
             else {
                 cout << var_name << ": undeclared variable";
+                return 0;
             }
-            return;
+            return 1;
         }
     }
 
@@ -87,18 +93,35 @@ void run_expression_blk(blk& bl) {
         regSize++;
         //cout << var_name << ": undeclared variable";
     }
+
+    return 1;
 }
 
-void run_read_blk(blk& bl) {
-    string instr = remove_spaces(bl.container);
+void run_expression_blk(blk& bl) {
+    string cont = remove_spaces(bl.container);
+    cont += ",";
+    int separator = cont.find(',');
+    
+    while (separator != -1) {
+        string instr = cont.substr(0, separator);
+        
+        if (!_run_expression(instr))
+            return;
+
+        cont = cont.substr(separator + 1, cont.size() - separator - 1);
+        separator = cont.find(',');
+    }
+}
+
+bool _run_read_reg(string instr) {
     if (!isalpha(instr[0]) && instr[0] != '_') {
         cout << "Variable names need to start with a letter or with an underscore\n";
-        return;
+        return 0;
     }
     for (int i = 0; i < instr.size(); i++)
         if (instr[i] != '_' && !isalpha(instr[i]) && !isdigit(instr[i])) {
             cout << "Variable names can only contain letters, digits or the underscore\n";
-            return;
+            return 0;
         }
     
     int reg_idx = get_reg_idx(instr);
@@ -111,21 +134,52 @@ void run_read_blk(blk& bl) {
         cin >> r[regSize].val;
         regSize++;
     }
+
+    return 1;
+}
+
+void run_read_blk(blk& bl) {
+    string cont = remove_spaces(bl.container);
+    cont += ",";
+    int separator = cont.find(',');
+    
+    while (separator != -1) {
+        string instr = cont.substr(0, separator);
+        
+        if (!_run_read_reg(instr))
+            return;
+
+        cont = cont.substr(separator + 1, cont.size() - separator - 1);
+        separator = cont.find(',');
+    }
+}
+
+void print_qoute_string(string instr) {
+    for (int i = 1; i < instr.size() - 1; i++) 
+        if (instr[i] == '\\' && instr[i + 1] == 'n')
+            cout << '\n', i++;
+        else
+            cout << instr[i];
 }
 
 void run_write_blk(blk& bl) {
-    if (bl.container[0] == '"')
-        for (int i = 1; i < bl.container.size() - 1; i++)
-            cout << bl.container[i];
-    else {
-        //string var_name = remove_spaces(bl.container);
-        //cout << *get_reg(var_name);
-        float result = expression_eval(bl.container);
-        //float result = _ERROR;
-        if (result != _ERROR)
-            cout << result;
+    string cont = bl.container;
+    cont += ",";
+    int separator = cont.find(',');
+
+    while (separator != -1) {
+        string instr = cont.substr(0, separator);
+        remove_leading_spaces(instr);
+        if (instr[0] == '"')
+            print_qoute_string(instr);
+        else {
+            float result = expression_eval(instr);
+            if (result != _ERROR)
+                cout << result;
+        }
+        cont = cont.substr(separator + 1, cont.size() - separator - 1);
+        separator = cont.find(',');
     }
-    cout << '\n';
 }
 
 void drawNextCnnt(blk& b1, blk& b2, bool brnch = 0) {
@@ -215,6 +269,9 @@ void wait_key(int& mode) {
 }
 
 void runInterpretor(int _mode) {
+    while (!stackA.empty()) stackA.pop();
+    while (!stackB.empty()) stackB.pop();
+
     srand(time(0));
     draw_regPanel(BG);
     if (_mode)
