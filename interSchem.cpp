@@ -14,8 +14,8 @@ using namespace std;
 #include "Generarecod.h"
 #include "ConnectorsDrawing.h"
 #include "blk.h"
-#include "interpretor.h"
 #include "export.h"
+#include "interpretor.h"
 
 int main() {
     initwindow(width, height, "InterSchem");

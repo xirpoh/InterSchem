@@ -209,16 +209,19 @@ void draw_regPanel(int color) {
     }
 }
 
-char get_button_key(int mx, int my) {
+char get_button_key(int mx, int my, bool exec = 0) {
     clearmouseclick(WM_LBUTTONDOWN);
-    if (mx > width - intermW && mx < width &&
+    if (mx > width - intermW - filemenuW && mx < width &&
         my > height - intermH && my < height) {
-        mx -= width - intermW;
+        mx -= width - intermW - filemenuW;
         my -= height - intermH;
 
-        int dw = intermW / 4;
-        string keys = "qnmf";
-        return keys[floor((float)mx / dw)];
+        int dw = (intermW + 236) / 7;
+        string keys = "NOSqnmf";
+        int idx = floor((float)mx / dw);
+        if (idx < 3 && exec)
+            return '%';
+        return keys[idx];
     }
 
     return '%';
@@ -231,7 +234,7 @@ void interbutton(const char* image_name) {
 void wait_key(int& mode) {
     while (1) {
         if (ismouseclick(WM_LBUTTONDOWN)) {
-            char key = get_button_key(mousex(), mousey());
+            char key = get_button_key(mousex(), mousey(), 1);
             if (key != '%') {
                 if (key == 'm') {
                     mode = !mode;
@@ -268,6 +271,16 @@ void wait_key(int& mode) {
     }
 }
 
+void reset_reg_oprt() {
+    for (int i = 0; i < regSize; i++)
+        apply_post_op[i] = 0;
+}
+
+void apply_reg_oprt() {
+    for (int i = 0; i < regSize; i++)
+        r[i].val += apply_post_op[i];
+}
+
 void runInterpretor(int _mode) {
     while (!stackA.empty()) stackA.pop();
     while (!stackB.empty()) stackB.pop();
@@ -289,8 +302,11 @@ void runInterpretor(int _mode) {
     blk cblk = b[curr_blk]; 
     bool done = 0;
     while (!done && mode < 2) {
+
+        reset_reg_oprt();
+
         if (ismouseclick(WM_LBUTTONDOWN)) {
-            char key = get_button_key(mousex(), mousey());
+            char key = get_button_key(mousex(), mousey(), 1);
             if (key == 'q') {
                 interbutton("images\\STOP.jpg");
                 delay(ANIM_DELAY * 2);
@@ -383,6 +399,7 @@ void runInterpretor(int _mode) {
             cblk = b[cblk.next];
         }
         
+        apply_reg_oprt();
         if (!done)
             draw_regPanel(BG);
     }
@@ -393,7 +410,28 @@ void runInterpretor(int _mode) {
     
 bool interpretor_menu() {
     char key = get_button_key(mousex(), mousey());
-    if (key == 'n') {
+    
+    switch (key) {
+        case 'N':
+            resetScheme();
+            return 1;
+        case 'O':
+            import_scheme();
+            return 1;
+        case 'S':
+            export_scheme();
+            return 1;
+        case 'n':
+            runInterpretor(1);
+            return 1;
+        case 'm':
+            runInterpretor(0);
+            return 1;
+        default:
+            return 0;
+    }
+
+    /*if (key == 'n') {
         runInterpretor(1);
         return 1;
     }
@@ -401,7 +439,7 @@ bool interpretor_menu() {
         runInterpretor(0);
         return 1;
     }
-    return 0;
+    return 0;*/
 }
 
 #endif

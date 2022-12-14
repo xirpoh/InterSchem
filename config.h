@@ -47,6 +47,6 @@ int STEP_DELAY = SLOW_STEP;
 
 #define intermW 306
 #define intermH 70
-
+#define filemenuW 236
 
 #endif

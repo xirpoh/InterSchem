@@ -115,6 +115,17 @@ void tokenize(string expr, TokenList& tl) {
             tl.num_tokens++;
         }
     }
+
+    for (int i = 0; i < tl.num_tokens - 1; i++)
+        if (tl.token[i].id == VAR && (tl.token[i + 1].op_id == 1 || tl.token[i + 1].op_id == 2)) {
+            int reg_idx = get_reg_idx(tl.token[i].str);
+            if (reg_idx != -1) {
+                apply_post_op[reg_idx] = (tl.token[i + 1].op_id == 1) ? 1 : -1;
+                for (int j = i + 2; j < tl.num_tokens; j++)
+                    tl.token[j - 1] = tl.token[j];
+                tl.num_tokens--;
+            }
+        }
 }
 
 bool is_const_token_valid(Token token) {

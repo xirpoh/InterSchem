@@ -144,7 +144,7 @@ string pathtostring(int wid) {
 }
 void tabulation(int tablevel) {
 	for (int i = 0; i < tablevel; i++) {
-		cout << "  ";
+		cout << "    ";
 	}
 }
 bool EuEntry(int id, int branch = 0) {
@@ -252,10 +252,11 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 				cout << "}\n";
 				if (!u2dec) {
 					tabulation(tablevel);
-					cout << "else" << "{\n";
-					thecode(b[id].nextF, tablevel + 1, deb);
+					//cout << "else" << "{\n";
+					cout << "\n";
+                    thecode(b[id].nextF, tablevel, deb);
 					tabulation(tablevel);
-					cout << "}\n";
+					//cout << "}\n";
 				}
 			}
 			else if (!u2dec && swbranch == 1) {
@@ -268,10 +269,11 @@ void thecode(int id, int tablevel = 0, bool deb = 0) {
 				cout << "}\n";
 				if (!u1dec) {
 					tabulation(tablevel);
-					cout << "else" << "{\n";
-					thecode(b[id].next, tablevel + 1, deb);
+					//cout << "else" << "{\n";
+                    cout << "\n";
+					thecode(b[id].next, tablevel, deb);
 					tabulation(tablevel);
-					cout << "}\n";
+					//cout << "}\n";
 				}
 			}
 			return;

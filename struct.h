@@ -52,4 +52,6 @@ bool ignorewhendrawingines[mxBLK] = { 0 };
 reg r[mxREG];
 int regSize = 0;
 
+int apply_post_op[mxREG];
+
 #endif

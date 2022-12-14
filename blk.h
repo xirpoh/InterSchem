@@ -142,6 +142,9 @@ void drawScheme() {
     setfillstyle(SOLID_FILL, BG);
     bar(0, 0, width, height);
     readimagefile("images\\IDLE.jpg", width - 306, height - 70, width, height);
+    readimagefile("images\\FILE.jpg", width - intermW - filemenuW, height - intermH, 
+                                      width - intermW, height);
+
     drawCnnt(CNNT_STROKE);
     for (int i = 0; i < blkSize; i++)
         drawBlk(b[i]);
