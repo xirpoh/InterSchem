@@ -410,7 +410,10 @@ void runInterpretor(int _mode) {
     
 bool interpretor_menu() {
     char key = get_button_key(mousex(), mousey());
-    
+    if (key != '%')
+        deselectBlks(); drawBlks();
+
+
     switch (key) {
         case 'N':
             resetScheme();

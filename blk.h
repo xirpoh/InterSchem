@@ -132,9 +132,19 @@ void drawBlk(blk& b) {
     _drawBlk(b);
 }
 
+void drawBlks() {
+    for (int i = 0; i < blkSize; i++)
+        drawBlk(b[i]);
+}
+
 void clearBlk(blk b) {
     setcolor(BG);
     _drawBlk(b);
+}
+
+void clearBlks() {
+    for (int i = 0; i < blkSize; i++)
+        clearBlk(b[i]);
 }
 
 void drawScheme() {
@@ -146,8 +156,7 @@ void drawScheme() {
                                       width - intermW, height);
 
     drawCnnt(CNNT_STROKE);
-    for (int i = 0; i < blkSize; i++)
-        drawBlk(b[i]);
+    drawBlks();
     
     setcolor(WHITE);
     outtextxy(BOUND_TXT / 2, height - BOUND_TXT - textheight(scheme_name), scheme_name);
@@ -172,6 +181,11 @@ int selectBlk(int x, int y) {
 
 void deselectBlk(blk& b) {
     b.color = BLK_STROKE;
+}
+
+void deselectBlks() {
+    for (int i = 0; i < blkSize; i++)
+        deselectBlk(b[i]);
 }
 
 bool interTest(blk a, blk b) {
@@ -206,17 +220,24 @@ void leftClick() {
 
     if (idx >= 0) {
         blk& bl = b[idx];
-        bl.color = YELLOW;
+        bl.color = LIGHTBLUE;
         drawBlk(bl);
         //drawCnnt(BG);
 
         int dx = bl.x - mx, dy = bl.y - my;
+        int offX[mxBLK], offY[mxBLK];
+        for (int i = 0; i < blkSize; i++)
+            offX[i] = b[i].x - bl.x, offY[i] = b[i].y - bl.y;
+        
         while (!ismouseclick(WM_LBUTTONUP)) {
             if (mousex() + dx == bl.x && mousey() + dy == bl.y)
                 continue;
              
-            clearBlk(bl);
+            //clearBlk(bl);
             drawCnnt(BG);
+            for (int i = 0; i < blkSize; i++)
+                if (b[i].color == LIGHTBLUE)
+                    clearBlk(b[i]);
 
             blk cpy = bl;
             bl.x = mousex() + dx;
@@ -224,16 +245,53 @@ void leftClick() {
 
             if (areBlksInter(idx) || !isBlkInside(bl))
                 bl = cpy;
+            
+            for (int i = 0; i < blkSize; i++)
+                if (i != idx && b[i].color == LIGHTBLUE)
+                    b[i].x = bl.x + offX[i], b[i].y = bl.y + offY[i];
 
-            setcolor(BG); 
+            //setcolor(BG); 
             drawCnnt(CNNT_STROKE);
-            drawBlk(bl);
+            //drawBlk(bl);
+            for (int i = 0; i < blkSize; i++)
+                if (b[i].color == LIGHTBLUE)
+                    drawBlk(b[i]);
             delay(DELAY);
         }
-        //drawCnnt(CNNT_STROKE);
 
-        deselectBlk(bl);
-        drawBlk(bl);
+        deselectBlks();
+        drawBlks();
+    }
+    else {
+        int dx = mx, dy = my;
+        while (!ismouseclick(WM_LBUTTONUP)) {
+            dx = mousex(), dy = mousey();
+            setcolor(LIGHTBLUE);
+            /*if (dx > mx)
+                rectangle(mx, my, dx, dy);
+            else 
+                rectangle(dx, my, mx, dy);*/
+            rectangle(min(mx, dx), min(my, dy), max(mx, dx), max(my, dy));
+            delay(DELAY);
+            setcolor(BG);
+            rectangle(min(mx, dx), min(my, dy), max(mx, dx), max(my, dy));
+            /*if (dx > mx)
+                rectangle(mx, my, dx, dy);
+            else 
+                rectangle(dx, my, mx, dy);*/
+        }
+
+        blk select = newBlk(min(mx, dx), min(my, dy), abs(mx - dx), abs(my - dy), EXPR);
+        bool just_selected = 0;
+        for (int i = 0; i < blkSize; i++)
+            if (interTest(select, b[i])) {
+                b[i].color = (b[i].color == LIGHTBLUE) ? BLK_STROKE : LIGHTBLUE;
+                if (b[i].color == LIGHTBLUE)
+                    just_selected = 1;
+            }
+        if (!just_selected)
+            deselectBlks();
+        drawScheme();
     }
 
 }
@@ -412,6 +470,7 @@ void rightClick() {
     int mx = mousex(), my = mousey();
 
     if (removeCnnt(mx, my)) {
+        deselectBlks(); drawBlks();
         clearmouseclick(WM_RBUTTONDOWN);
         clearmouseclick(WM_RBUTTONUP);
         return;
@@ -420,9 +479,13 @@ void rightClick() {
     int idx = selectBlk(mx, my);
 
     if (idx >= 0) {
-        removeBlk(idx);
+        if (b[idx].color == LIGHTBLUE)
+            deselectBlk(b[idx]), drawBlk(b[idx]);
+        else 
+            removeBlk(idx);
     }
     else {
+        deselectBlks(); drawBlks();
         char type;
         while (1) {
             type = getch();
@@ -486,6 +549,7 @@ bool mouseHover() {
             int cx = b[i].x + b[i].w / 2, cy = b[i].y + b[i].h;
             if (mouseHoverEvent(i, cx, cy)) {
                 drawCnnt(CNNT_STROKE);
+                deselectBlks(); drawBlks();
                 return 1;
             }
         }
@@ -493,12 +557,14 @@ bool mouseHover() {
             int cx = b[i].x, cy = b[i].y + b[i].h / 2;
             if (mouseHoverEvent(i, cx, cy)) {
                 drawCnnt(CNNT_STROKE);
+                deselectBlks(); drawBlks();
                 return 1;
             }
 
             cx = b[i].x + b[i].w, cy = b[i].y + b[i].h / 2;
             if (mouseHoverEvent(i, cx, cy, 1)) {
                 drawCnnt(CNNT_STROKE);
+                deselectBlks(); drawBlks();
                 return 1;
             }
         }
@@ -508,6 +574,7 @@ bool mouseHover() {
 }
 
 void doubleLeftClick() {
+    deselectBlks(), drawBlks();
     int mx = mousex(), my = mousey();
     int idx = selectBlk(mousex(), mousey());
     if (idx >= 0 && b[idx].type != START && b[idx].type != STOP) {
