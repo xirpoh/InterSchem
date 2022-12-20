@@ -247,8 +247,12 @@ void leftClick() {
                 bl = cpy;
             
             for (int i = 0; i < blkSize; i++)
-                if (i != idx && b[i].color == LIGHTBLUE)
+                if (i != idx && b[i].color == LIGHTBLUE) {
+                    blk tmp_cpy = b[i];
                     b[i].x = bl.x + offX[i], b[i].y = bl.y + offY[i];
+                    if (areBlksInter(i))
+                        b[i] = tmp_cpy;
+                }
 
             //setcolor(BG); 
             drawCnnt(CNNT_STROKE);
