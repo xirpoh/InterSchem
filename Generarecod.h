@@ -44,6 +44,13 @@ bool ifinpath(vector<ifentry> path, int id, bool branch) {
 	return 0;
 
 }
+char predecessors(int id) {
+	char counter = 0;
+	for (int i = 0; i < blkSize; i++) {
+		if (b[i].next == id || b[i].nextF == id)  counter++;
+	}
+	return counter;
+}
 void addwEntry(vector<ifentry> path, int wid, int cnext, bool branch = 0, bool deb = 0) {
 	if (wid >= 0) {
 		wEntries[wid].path.push_back(*(new ifentry{ -1,0 }));
@@ -61,121 +68,15 @@ void addwEntry(vector<ifentry> path, int wid, int cnext, bool branch = 0, bool d
 		if (deb)printf(" 2.Adding wentries to %d branch %d \n", cnext, branch);
 	}
 }
-void cautawhileentries(int id, vector<ifentry> path, int deb = 0) {
-	if (id < 0) return;
-	if (deb) printf("id %d next %d nextF %d\n", id, b[id].next, b[id].nextF);
-	blk& c = b[id];
-	if (c.type == DECISION) {
-		if (deb) cout << "decision ";
-		if (c.next >= 0) {
-			vizitat[id * 2] = true;
-			if (deb) printf(" %d e vizitat ", id * 2);
-			if (deb) cout << "next >=0 ";
-			ifentry* e = new ifentry{ id, 0 };
-			if (!ifinpath(path, id, 0)) path.push_back(*e);
-			if (vizitat[c.next * 2] == 0 && vizitat[c.next * 2 + 1] == 0) {
-				if (deb) cout << "next nevizitat\n";
-				cautawhileentries(c.next, path, deb);
-			}
-			else {
-				if (deb) cout << "next vizitat ";
-				if (vizitat[c.next * 2]) {
-					int wid = EwEntry(c.next);
-					addwEntry(path, wid, c.next);
-				}
-				else if (vizitat[c.next * 2 + 1]) {
-					int wid = EwEntry(c.next, 1);
-					addwEntry(path, wid, c.next, 1);
-				}
-				if (deb) cout << '\n';
-			}
-			path.pop_back();
-		}
-		else {
-			uEntries.push_back(*(new usedentry{ id,0 }));
-		}
-		if (c.nextF >= 0) {
-			vizitat[id * 2 + 1] = true;
-			if (deb) printf(" %d e vizitat ", id * 2 + 1);
-			if (deb) cout << "nextF >=0 ";
-			ifentry* e = new ifentry{ id, 1 };
-			if (!ifinpath(path, id, 1)) path.push_back(*e);
-			if (vizitat[c.nextF * 2] == 0 && vizitat[c.nextF * 2 + 1] == 0) {
-				if (deb) cout << "nextF nevizitat\n ";
-				cautawhileentries(c.nextF, path, deb);
-			}
-			else {
-				if (deb) cout << "nextF vizitat ";
-				if (vizitat[c.nextF * 2]) {
-					int wid = EwEntry(c.nextF);
-					addwEntry(path, wid, c.nextF);
-				}
-				else if (vizitat[c.nextF * 2 + 1]) {
-					int wid = EwEntry(c.nextF, 1);
-					addwEntry(path, wid, c.nextF, 1);
-				}
-				if (deb) cout << '\n';
-			}
-			path.pop_back();
-		}
-		else {
-			uEntries.push_back(*(new usedentry{ id,1 }));
-		}
+char lastifentryinpath(vector<ifentry> path) {
+
+	for (int i = path.size() - 1; i >= 0; i--) {
+		if (b[path[i].id].type == DECISION) return path[i].id;
 	}
-	else {
-		if (deb) cout << "not decision\n";
-		vizitat[id * 2] = true;
-		if (c.next >= 0) {
-			if (deb) printf("vizitat[%d] %d, vizitat[%d] %d\n ", c.next * 2, vizitat[c.next * 2], c.next * 2 + 1, vizitat[c.next * 2 + 1]);
-			if (vizitat[c.next * 2]) {
-				if (deb)cout << " addwEntry " << c.next << '\n';
-				int wid = EwEntry(c.next);
-				addwEntry(path, wid, c.next, 0);
-			}
-			else if (vizitat[c.next * 2 + 1]) {
-				if (deb)cout << " addwEntry " << c.next << '\n';
-				int wid = EwEntry(c.next, 1);
-				addwEntry(path, wid, c.next, 1);
-			}
-			else {
-				if (deb)cout << " cauta in next\n";
-				cautawhileentries(c.next, path, deb);
-			}
-		}
-		else if (c.nextF >= 0) {
-			if (deb) printf("vizitat[%d] %d, vizitat[%d] %d \n", c.nextF * 2, vizitat[c.nextF * 2], c.nextF * 2 + 1, vizitat[c.nextF * 2 + 1]);
-			if (vizitat[c.nextF * 2]) {
-				if (deb)cout << " addwEntry " << c.nextF << '\n';
-				int wid = EwEntry(c.nextF);
-				addwEntry(path, wid, c.nextF, 0);
-			}
-			else if (vizitat[c.nextF * 2 + 1]) {
-				if (deb)cout << " addwEntry " << c.nextF << '\n';
-				int wid = EwEntry(c.nextF, 1);
-				addwEntry(path, wid, c.nextF, 1);
-			}
-			else {
-				if (deb)cout << " cauta in nextF\n";
-				cautawhileentries(c.nextF, path, deb);
-			}
-		}
-	}
+	return -1;
 }
-string pathtostring(int wid) {
-	string s = "";
-	for (int i = 0; i < wEntries[wid].path.size(); i++) {
-		if (wEntries[wid].path[i].id == -1) {
-			s += " || ";
-			continue;
-		}
-		if (wEntries[wid].path[i].branch == 1) s += "!(";
-		s += b[wEntries[wid].path[i].id].container;
-		if (wEntries[wid].path[i].branch == 1) s += ")";
-		if (i != wEntries[wid].path.size() - 1 && wEntries[wid].path[i + 1].id != -1) s += " && ";
-	}
-	return s;
-}
-void tabulation(int tablevel, bool mod = 0, string filename = "") { 
+ 
+void tabulation(int tablevel, bool mod = 0, string filename = "") {
 	if (mod == 0 && filename == "") {
 		for (int i = 0; i < tablevel; i++) {
 			cout << " ";
@@ -183,7 +84,7 @@ void tabulation(int tablevel, bool mod = 0, string filename = "") {
 	}
 	else if (mod == 1 && filename == "") {
 		for (int i = 0; i < tablevel * 2; i++) {
-			if (skipleftaux > 0) skipleftaux--;			
+			if (skipleftaux > 0) skipleftaux--;
 			else {
 				outtextxy(codpaneltopoffset + writtenlength, codpanelleftoffset + writtenheight, (char*)" ");
 				writtenlength += textwidth((char*)" ");
@@ -198,6 +99,235 @@ void tabulation(int tablevel, bool mod = 0, string filename = "") {
 		fclose(fptr);
 	}
 }
+void showpath(vector<ifentry> path, int tablevel = 0) {
+	cout << "\n";
+	tabulation(tablevel);
+	cout << "THE PATH : \n";
+	tabulation(tablevel);
+	for (int i = 0; i < path.size(); i++) {		
+		cout << stringToChar(b[path[i].id].container) << "  ";
+	}
+	cout << "\n";
+	tabulation(tablevel);
+	cout << "THE PATH : \n";
+}
+
+void DeleteUEntry(int id, bool branch) {
+	int start;
+	bool gasit = 0;
+	for (int i = 0; i < uEntries.size(); i++) {
+		if (uEntries[i].id == id && uEntries[i].branch == branch) {
+			start = i;
+			gasit = 1;
+			break;
+		}
+	}
+	if (!gasit) return;
+	for (int i = start; i < uEntries.size() - 1; i++) {
+		uEntries[i] = uEntries[i + 1];
+	}
+	uEntries.pop_back();
+
+}
+void cautawhileentries(int id, vector<ifentry> &path, int tablevel = 0, bool deb = 0) {
+	deb = 0;
+	if (id < 0) return;
+	if (deb) {
+		cout << '\n';
+		tabulation(tablevel);
+		printf("Current:%s,id:%d;\n",stringToChar(b[id].container), id);
+		tabulation(tablevel);
+		printf("Next:%s,id:%d;\n", stringToChar(b[b[id].next].container), b[id].next);
+		tabulation(tablevel);
+		printf("Next:%s,id:%d;\n", stringToChar(b[b[id].nextF].container), b[id].nextF); 
+
+	}
+	blk& c = b[id];
+	if (c.type != DECISION) {
+		ifentry* e = new ifentry{ id, 0 };
+		if (!ifinpath(path, id, 0)) path.push_back(*e);
+	}
+	if(deb)showpath(path,tablevel);
+	if (c.type == DECISION) { 
+		if (deb) tabulation(tablevel);
+		if (deb) cout << "decision ";
+		if (c.next >= 0) {
+			vizitat[id * 2] = true;
+			if (deb) tabulation(tablevel);
+			if (deb) printf(" %d e vizitat ", id * 2);
+			if (deb) tabulation(tablevel);
+			if (deb) cout << "next >=0 ";
+			ifentry* e = new ifentry{ id, 0 };
+			if (!ifinpath(path, id, 0)) path.push_back(*e);
+			if(deb)showpath(path,tablevel);
+			if (vizitat[c.next * 2] == 0 && vizitat[c.next * 2 + 1] == 0) {
+				if (deb) tabulation(tablevel);
+				if (deb) cout << "next nevizitat\n";
+				cautawhileentries(c.next, path,tablevel+3, deb);
+			}
+			else {
+				if (deb) tabulation(tablevel);
+				if (deb) cout << "next vizitat ";
+				if (vizitat[c.next * 2]) {
+					int wid = EwEntry(c.next);
+					if (deb) tabulation(tablevel);
+					if (deb)cout << " \naddwEntry " << c.next << '\n';
+					addwEntry(path, wid, c.next);
+				}
+				else if (vizitat[c.next * 2 + 1]) {
+					int wid = EwEntry(c.next, 1);
+					if (deb) tabulation(tablevel);
+					if (deb)cout << "\n addwEntry " << c.next << " 1 " << '\n';
+					addwEntry(path, wid, c.next, 1);
+				}
+				if (deb) tabulation(tablevel);
+				if (deb) cout << '\n';
+			}
+			if (deb) tabulation(tablevel);
+			if(deb)showpath(path,tablevel);
+			if (deb) tabulation(tablevel);
+			if (deb) printf("path.back.contnt: %s\n",stringToChar(b[path.back().id].container));
+			while (path.back().id != id) {				
+				if (deb) tabulation(tablevel);
+				if (deb) printf("sterge vizitat de %d, branch %d\n", path.back().id, path.back().branch);
+				DeleteUEntry(path.back().id, path.back().branch);
+				vizitat[2*path.back().id + path.back().branch] = 0;
+				path.pop_back();
+			}
+			path.pop_back();
+		}
+		else {
+			uEntries.push_back(*(new usedentry{ id,0 }));
+		}
+		if (c.nextF >= 0) {
+			vizitat[id * 2 + 1] = true;
+			if (deb) tabulation(tablevel);
+			if (deb) printf(" %d e vizitat ", id * 2 + 1);
+			if (deb) tabulation(tablevel);
+			if (deb) cout << "nextF >=0 ";
+			ifentry* e = new ifentry{ id, 1 };
+			if (!ifinpath(path, id, 1)) path.push_back(*e);
+			if(deb)showpath(path,tablevel);
+			if (vizitat[c.nextF * 2] == 0 && vizitat[c.nextF * 2 + 1] == 0) {
+				if (deb) tabulation(tablevel);
+				if (deb) cout << "nextF nevizitat\n ";
+				cautawhileentries(c.nextF, path,tablevel+3, deb);
+			}
+			else {
+				if (deb) tabulation(tablevel);
+				if (deb) cout << "nextF vizitat ";
+				//&& lastifentryinpath(path) != id
+				if (vizitat[c.nextF * 2] &&vizitatfrom[c.nextF*2]!=id) {
+					int wid = EwEntry(c.nextF);
+					if (deb) tabulation(tablevel);
+					if (deb)cout << "\n addwEntry " << c.nextF << '\n';
+					addwEntry(path, wid, c.nextF);
+				}
+				//&& lastifentryinpath(path) != id
+				else if (vizitat[c.nextF * 2 + 1] && vizitatfrom[c.nextF * 2+1] != id) {
+					int wid = EwEntry(c.nextF, 1);
+					if (deb) tabulation(tablevel);
+					if (deb)cout << "\n addwEntry " << c.next << " 1 " << '\n';
+					addwEntry(path, wid, c.nextF, 1);
+				}
+				else cautawhileentries(c.nextF, path,tablevel+3,deb);
+				if (deb) tabulation(tablevel);
+				if (deb) cout << '\n';
+			}
+			if (deb) tabulation(tablevel);
+			if(deb)showpath(path,tablevel);
+			if (deb) printf("path.back.contnt: %s\n",stringToChar(b[path.back().id].container));
+			while (path.back().id != id) {				
+				if (deb) tabulation(tablevel);
+				if (deb) printf("sterge vizitat de %d, branch %d\n", path.back().id,path.back().branch);
+				vizitat[2*path.back().id + path.back().branch] = 0;
+				DeleteUEntry(path.back().id, path.back().branch);
+				path.pop_back();
+			}
+			path.pop_back();
+		}
+		else {
+			uEntries.push_back(*(new usedentry{ id,1 }));
+		}
+	}
+	else {
+		if (deb) tabulation(tablevel);
+		if (deb) cout << "not decision\n";
+		vizitat[id * 2] = true;
+		if(path.size()>0) vizitatfrom[id * 2] = lastifentryinpath(path);
+		if (c.next >= 0) {
+			if (deb) tabulation(tablevel);
+			if (deb) printf("vizitat[%d] %d, vizitat[%d] %d\n ", c.next * 2, vizitat[c.next * 2], c.next * 2 + 1, vizitat[c.next * 2 + 1]);
+			if (vizitat[c.next * 2]) {
+				if (deb) tabulation(tablevel);
+				if (deb)cout << "\n addwEntry " << c.next << '\n';
+				int wid = EwEntry(c.next);
+				addwEntry(path, wid, c.next, 0);
+			}
+			else if (vizitat[c.next * 2 + 1]) {
+				if (deb) tabulation(tablevel);
+				if (deb)cout << "\n addwEntry " << c.next << " 1 " << '\n';
+				int wid = EwEntry(c.next, 1);
+				addwEntry(path, wid, c.next, 1);
+			}
+			else {
+				if (deb) tabulation(tablevel);
+				if (deb)cout << " cauta in next\n";
+				cautawhileentries(c.next, path,tablevel+3, deb);
+			}
+		}
+		else if (c.nextF >= 0) {
+			if (deb) tabulation(tablevel);
+			if (deb) printf("vizitat[%d] %d, vizitat[%d] %d \n", c.nextF * 2, vizitat[c.nextF * 2], c.nextF * 2 + 1, vizitat[c.nextF * 2 + 1]);
+			if (vizitat[c.nextF * 2]) {
+				if (deb) tabulation(tablevel);
+				if (deb)cout << "\n addwEntry " << c.nextF << '\n';
+				int wid = EwEntry(c.nextF);
+				addwEntry(path, wid, c.nextF, 0);
+			}
+			else if (vizitat[c.nextF * 2 + 1]) {
+				if (deb) tabulation(tablevel);
+				if (deb)cout << " \naddwEntry " << c.nextF << " 1 " << '\n';
+				int wid = EwEntry(c.nextF, 1);
+				addwEntry(path, wid, c.nextF, 1);
+			}
+			else {
+				if (deb) tabulation(tablevel);
+				if (deb)cout << " cauta in nextF\n";
+				cautawhileentries(c.nextF, path,tablevel+3, deb);
+			}
+		}
+	}
+}
+string pathtostring(int wid) {
+	string s = "";
+	vector<ifentry> copy;
+	int start = wEntries[wid].beginning;
+	bool gasitstrat = 0;
+	for (int i = 0; i < wEntries[wid].path.size(); i++) { 
+		if (wEntries[wid].path[i].id == start) {
+			start = i; gasitstrat=1; 
+			break;
+		}		
+	}	
+	if (!gasitstrat) start = 0;
+	for (int i = start; i < wEntries[wid].path.size(); i++) {
+		if (b[wEntries[wid].path[i].id].type == DECISION) copy.push_back(wEntries[wid].path[i]);		
+		else if (wEntries[wid].path[i].id == -1) copy.push_back(wEntries[wid].path[i]);
+	}
+	
+	for (int i = 0; i < copy.size(); i++) {		
+		if (copy[i].id == -1) {
+			s += " || ";
+			continue;
+		}
+		if (copy[i].branch == 1) s += "!(";
+		s += b[copy[i].id].container;
+		if (copy[i].branch == 1) s += ")";
+		if (i != copy.size() - 1 && copy[i+1].id != -1) s += " && ";
+	}
+	return s;
+}
 bool EuEntry(int id, int branch = 0) {
 	for (auto a : uEntries) {
 		if (a.id == id && a.branch == branch) return 1;
@@ -208,9 +338,9 @@ bool isused(int id, int branch = 0, bool deb = 0) {
 	if (deb) cout << "id " << id << ' ';
 	if (b[id].type != DECISION) {
 		if (branch == 1) return 1;
-		if (EuEntry(id, branch)) {
+		if (EuEntry(id, 0)) {
 			if (deb) cout << "is eEntry, not decision\n";
-			return 1;
+			return 1;	
 		}
 		else return 0;
 	}
@@ -240,6 +370,7 @@ bool isused(int id, int branch = 0, bool deb = 0) {
 	return 0;
 }
 void adduentry(int id, bool branch = 0) {
+	//if (predecessors(id) > 1) return;
 	uEntries.push_back(*(new usedentry{ id,branch }));
 }
 int isconstant(string s, int current) {
@@ -251,24 +382,6 @@ int isconstant(string s, int current) {
 	}
 	return end;
 }
-int isvariable(string s, int current) {
-	int end = current - 1;
-	string var = "";
-	for (int i = current; i < s.size(); i++) {
-		if ((s[i] >= 65 && s[i] <= 90) ||
-			(s[i] >= 97 && s[i] <= 122)) {
-			end++; var += s[i];
-		}
-		else break;
-	}
-	if (end == current - 1) return end;
-	for (int i = 0; i < mxBLK; i++) {
-		if (strncmp(stringToChar(var), stringToChar(b[i].container), var.size()) == 0) {
-			return end;
-		};
-	}
-	return current - 1;
-}
 void scriesequence(string sequence, int lp, int rp, int mod = -1) {
 	if (mod == -1) {
 		for (int i = lp; i <= rp; i++) {
@@ -278,18 +391,42 @@ void scriesequence(string sequence, int lp, int rp, int mod = -1) {
 }
 vector<string> predefwords = { "if","do","while","return","else" };
 vector<string> vartypes = { "int","float","using","namespace" };
-vector<string> functions = { "main","abs" };
-int ismemberofvector(string s, int current, vector <string>& checkin) {
-	string var = "";
-	char sample[10];
-
-	for (string element : checkin) {
-		strncpy(sample, stringToChar(s) + current, element.size());
-		if (strncmp(sample, stringToChar(element), element.size()) == 0) {
-			return current + element.size() - 1;
-		}
+vector<string> functions = { "fabs", "exp", "log", "log2", "log10",
+								   "sqrt", "cbrt", "sin", "cos", "tan",
+								   "asin", "acos", "atan", "sinh",
+								   "cosh", "tanh", "asinh", "acosh", "atanh",
+								   "ceil", "floor", "round", "trunc", "tgamma",
+								   "flipSign", "keepSign", "logicNot", "bitwiseNot", "incr", "decr", "random",
+								   "push", "pushS", "pop", "popS", "top", "topS", "empty", "emptyS","main"};
+bool isvariable(string sequence) {
+	int max;
+	string element;
+	cout << "Trying in variable\n";
+	;
+	for (int i = 0; i < mxBLK; i++) {
+		if (b[i].type == READ) element = b[i].container;
+		else continue;
+		max = element.size() > sequence.size() ? element.size() : sequence.size();
+		printf("S: %s, %d\nelement: %s, %d\nmax: %d\n", stringToChar(sequence), sequence.size(),
+			stringToChar(element), element.size(), max);
+		if (strncmp(stringToChar(sequence), stringToChar(b[i].container), b[i].container.size()) == 0)
+			return true;
 	}
-	return current - 1;
+	
+	return false;
+}
+bool ismemberofvector(string s, vector <string>& checkin) {
+	int max;
+	cout << "Trying in membofvector\n";
+	;
+	for (string element : checkin) {		
+		max = element.size() > s.size() ? element.size() : s.size();	
+		printf("S: %s, %d\nelement: %s, %d\nmax: %d\n", stringToChar(s), s.size(),
+			stringToChar(element), element.size(), max);
+
+		if (strncmp(stringToChar(s), stringToChar(element), max) == 0) return true;
+	} 
+	return false;
 }
 
 int gray(string s, int current) {
@@ -303,7 +440,6 @@ int gray(string s, int current) {
 	}
 	return current - 1;
 }
-
 int orangeseq(string s, int current) {
 	int end = current - 1;
 	char sample[10];
@@ -347,14 +483,14 @@ void readfilename() {
 			}
 			filenamesize--;
 			*c = inputfilename[filenamesize];
-			cout << "Decreased filenameesize: " << filenamesize << '\n';
+			//cout << "Decreased filenameesize: " << filenamesize << '\n';
 			if (inputwritten != 0) inputwritten -= textwidth(c);
 			else {
 				inputvoffset -= 16;
 				for (int i = 0; i < filenamesize; i++) {
 					*c = inputfilename[i];
 					inputwritten += textwidth(c);
-					cout << "Inputwritten: " << inputwritten << '\n';
+					//cout << "Inputwritten: " << inputwritten << '\n';
 				}
 			}
 			*c = inputfilename[filenamesize];
@@ -377,11 +513,11 @@ void readfilename() {
 			if (filenamesize < inputfilename.size()) inputfilename[filenamesize] = *c;
 			else inputfilename += *c;
 			filenamesize++;
-			cout << "Increasedfilenamesize: " << filenamesize << '\n';
+			//cout << "Increasedfilenamesize: " << filenamesize << '\n';
 			outtextxy(inputx + inputwritten + inputinpadding, inputy + inputinpadding + inputvoffset, c);
 			inputwritten += textwidth(c);
 
-			cout << "Inputwritten: " << inputwritten << '\n';
+			//cout << "Inputwritten: " << inputwritten << '\n';
 		}
 
 		*c = getch();
@@ -538,9 +674,27 @@ void writeaccordingtocase(int caz, string sequence, int& lp, int rp,
 	setbkcolor(BG);
 	setcolor(BLK_STROKE);
 }
+bool isletter(char c) {
+
+	int ascii = (int)c;
+	if (ascii >= 65 && ascii <= 90 || ascii >= 97 && ascii <= 122) return true;
+	return false;
+
+}
+string getsubword(string sequence, int beginning) {
+	string s="";
+	int length = 0;
+	while (isletter(sequence[length+ beginning])) {
+		s+= sequence[length+ beginning];
+		length++;
+	}
+	s[length] = '\0';
+	return s;
+
+}
 void scriecod(string sequence, bool mod = 0, string filename = "") {
-	bool deb = 0;
-	if (deb)printf("Scriecod, sequence= \n%s\n", stringToChar(sequence));
+	bool deb = 1;
+	//if (deb)printf("Scriecod, sequence= \n%s\n", stringToChar(sequence));
 	int lp = 0, rp = 0;
 	int caz;  
 	static writeparam* stdwpar = new writeparam{ writtenheight,writtenlength,skiptop,skiptopaux,
@@ -559,57 +713,88 @@ void scriecod(string sequence, bool mod = 0, string filename = "") {
 		return;
 	}
 	while (lp < sequence.size()) {
-		if ((rp = isconstant(sequence, lp)) != lp - 1) {
-			if (deb)cout << "const\n";
-
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ constcolorr,constcolorg,constcolorb });
-		}
-		else if ((rp = ismemberofvector(sequence, lp, vartypes)) != lp - 1) {
-			if (deb)cout << "vartypet\n";
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ vartypecolorr,vartypecolorg,vartypecolorb });
-		}
-		else if ((rp = ismemberofvector(sequence, lp, functions)) != lp - 1) {
-			if (deb)cout << "func\n";
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ funccolorr,funccolorg,funccolorb });
-		}
-		else if ((rp = ismemberofvector(sequence, lp, predefwords)) != lp - 1) {
-			if (deb)cout << "predef\n";
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ predefcolorr,predefcolorg,predefcolorb });
-		}
-		else if ((rp = isvariable(sequence, lp)) != lp - 1) {
-			if (deb)cout << "var\n";
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ varcolorr,varcolorg,varcolorb });
-		}
-		else if ((rp = orangeseq(sequence, lp)) != lp - 1) {
-			if (deb)cout << "orange\n";
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ stringcolorr,stringcolorg,stringcolorb });
-		}
-		else if ((rp = gray(sequence, lp)) != lp - 1) {
-			if (deb)cout << "gray\n";
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ includecolorr,includecolorg,includecolorb });
+		cout << lp << '\n';
+		string subword = getsubword(sequence, lp);
+		if (subword.size() > 0) {
+			cout << "Subword: \n";
+			cout << subword << '\n';
+			rp = lp + subword.size() - 1;
+			if (ismemberofvector(subword, vartypes)) {
+				if (deb)cout << "vartypet\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ vartypecolorr,vartypecolorg,vartypecolorb });
+			}
+			else if (ismemberofvector(subword, functions)) {
+				if (deb)cout << "functions\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ funccolorr,funccolorg,funccolorb });
+			}
+			else if (ismemberofvector(subword, predefwords)) {
+				if (deb)cout << "predefword\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ predefcolorr,predefcolorg,predefcolorb });
+			}
+			else if (isvariable(subword)) {
+				if (deb)cout << "variable\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ varcolorr,varcolorg,varcolorb });
+			}
+			else {
+				if (deb)cout << "Caz default\n";				
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar);
+			}
 		}
 		else {
-			if (deb)cout << "else\n";
-			rp = lp;
-			writeaccordingtocase(caz, sequence, lp, rp, stdwpar);
+			cout << "Not Subword\n";
+			if ((rp = isconstant(sequence, lp)) != lp - 1) {
+				if (deb)cout << "const\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ constcolorr,constcolorg,constcolorb });
+			}
+			else if ((rp = orangeseq(sequence, lp)) != lp - 1) {
+				if (deb)cout << "orange\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ stringcolorr,stringcolorg,stringcolorb });
+			}
+			else if ((rp = gray(sequence, lp)) != lp - 1) {
+				if (deb)cout << "gray\n";
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ includecolorr,includecolorg,includecolorb });
+			}
+			else {
+				if (deb)cout << "Caz default\n";
+				rp = lp;
+				writeaccordingtocase(caz, sequence, lp, rp, stdwpar);
+			}
 		}
+		 
 
 	}
 
 }
-void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool deb = 0) {
-	deb = 0;
-	if (deb)printf("The code, i= %d\n", id);
+void thecode(int id,char restriction,vector<blk> &path,  int tablevel = 0, string filename = "", bool mod = 0, bool deb = 0) {
+	deb =0;
+	if (deb)printf("The code, i= %d, cont: %s\n", id,stringToChar(b[id].container));
 	if (b[id].type == START || b[id].type == STOP) {
 		adduentry(id);
-		thecode(b[id].next, tablevel, filename, mod, deb);
+		thecode(b[id].next,0, path, tablevel, filename, mod, deb);
 		return;
 	}
-
-
 	if (deb) cout << "id " << id << ' ';
-	int u1 = EuEntry(id), u2 = EuEntry(id, 1);
-	int u1dec = isused(id), u2dec = isused(id, 1);
+	bool u1 = EuEntry(id), u2 = EuEntry(id, 1);
+	bool isnextwentry = (EwEntry(b[id].next) != -1 || EwEntry(b[id].nextF) != -1);
+	if (predecessors(id) > 1 &&!isnextwentry ) {
+		u1 = 0; u2 = 0;
+	}
+	if(deb)cout << "pred: " << (int)predecessors(id) << '\n';
+	if (deb)cout << "u1: " << u1<< '\n';
+	if (deb) cout << "Calculate u1dec\n";
+	bool u1dec = isused(id);
+	if (deb) cout << "u1dec: "<<u1dec<<'\n';
+	if (deb) cout << "Calculate u2dec\n";
+	bool u2dec = isused(id, 1);
+	if (restriction == 1) {
+		u2 = 1;
+		u2dec = 1;
+	}
+	else if (restriction == 2) {
+		u1 = 1;
+		u1dec = 1;
+	}
+	if (deb) cout << "u2dec: " << u2dec << '\n';
 	int wid;
 	int swbranch;
 	if (b[id].type == DECISION) {
@@ -638,13 +823,14 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 				scriecod(b[id].container, mod, filename);
 				if (b[id].type == WRITE)  scriecod("cout<<);\n", mod, filename);
 				else scriecod(";\n", mod, filename);
-				thecode(b[id].next, tablevel + 1, filename, mod, deb);
+				thecode(b[id].next,0, path, tablevel + 1, filename, mod, deb);
 				tabulation(tablevel, mod, filename);
 				scriecod("}\n", mod, filename);
 				tabulation(tablevel, mod, filename);
 				scriecod("while(", mod, filename);
 				scriecod(pathtostring(wid), mod, filename);
 				scriecod(");\n", mod, filename);
+				DeleteUEntry(id,0);
 			}
 			else if (deb) cout << "<used>\n";
 			return;
@@ -656,17 +842,29 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 			if (!u1dec && swbranch == 0) {
 				tabulation(tablevel, mod, filename);
 				scriecod("while(", mod, filename);
-				scriecod(b[id].container, mod, filename);
+				//scriecod(b[id].container, mod, filename);
+				scriecod(pathtostring(wid), mod, filename);
 				scriecod("){\n", mod, filename);
-				thecode(b[id].next, tablevel + 1, filename, mod, deb);
+				thecode(b[id].next,0, path, tablevel + 1, filename, mod, deb);
 				tabulation(tablevel, mod, filename);
 				scriecod("}\n", mod, filename);
-				if (!u2dec) {
+				u2dec = isused(id, 1);
+				if (restriction == 1) u2dec = 1;
+				if (deb) cout << "Cont: " << b[id].container<<'\n';
+				if (deb) cout << "Aafter !udec; u2dec: " << u2dec << '\n';
+				isnextwentry = (EwEntry(b[id].next) != -1 || EwEntry(b[id].nextF) != -1);
+				if (deb) cout << "isnextwentry: " << isnextwentry << '\n';
+				if (deb) cout << "wentries: " << '\n';
+				if (deb)for (int i = 0; i < wEntries.size(); i++) {
+					cout << b[wEntries[i].beginning].container << "  ";
+				}
+				if (deb) cout << '\n';
+				if (!u2dec||predecessors(b[id].nextF)>1&&!isnextwentry&&b[id].nextF!=-1) {
 					tabulation(tablevel, mod, filename);
 					scriecod("if(!(", mod, filename);
 					scriecod(b[id].container, mod, filename);
 					scriecod(")){\n", mod, filename);
-					thecode(b[id].nextF, tablevel + 1, filename, mod, deb);
+					thecode(b[id].nextF,0, path, tablevel + 1, filename, mod, deb);
 					tabulation(tablevel, mod, filename);
 					scriecod("}\n", mod, filename);
 				}
@@ -674,9 +872,10 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 			else if (!u2dec && swbranch == 1) {
 				tabulation(tablevel, mod, filename);
 				scriecod("while(!(", mod, filename);
-				scriecod(b[id].container, mod, filename);
+				//scriecod(b[id].container, mod, filename);
+				scriecod(pathtostring(wid), mod, filename);
 				scriecod(")){\n", mod, filename);
-				thecode(b[id].nextF, tablevel + 1, filename, mod, deb);
+				thecode(b[id].nextF,0, path, tablevel + 1, filename, mod, deb);
 				tabulation(tablevel, mod, filename);
 				scriecod("}\n", mod, filename);
 				if (!u1dec) {
@@ -684,11 +883,12 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 					scriecod("if(", mod, filename);
 					scriecod(b[id].container, mod, filename);
 					scriecod("){\n", mod, filename);
-					thecode(b[id].next, tablevel + 1, filename, mod, deb);
+					thecode(b[id].next,0, path, tablevel + 1, filename, mod, deb);
 					tabulation(tablevel, mod, filename);
 					scriecod("}\n", mod, filename);
 				}
 			}
+			DeleteUEntry(id, wbranch);
 			return;
 		}
 
@@ -696,7 +896,7 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 	else if (deb) cout << "<not wentry>\n";
 	if (b[id].type != DECISION) {
 		if (deb) cout << "<not decision>\n";
-		if (!u1) {
+		if (!u1|| predecessors(id) > 1) {
 			if (deb) cout << "<not used>\n";
 			if (b[id].type == READ) {
 				if (deb) cout << "<read>\n";
@@ -706,9 +906,18 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 				scriecod("cin>>", mod, filename);
 				scriecod(b[id].container, mod, filename);
 				scriecod(";\n", mod, filename);
-
-				if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) ||
-					(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))) thecode(b[id].next, tablevel, filename, mod, deb);
+				if (b[b[id].next].type == DECISION) {
+					if((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1))&&
+						(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0)))
+						thecode(b[id].next, 0, path, tablevel, filename, mod, deb);
+					else if (EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1))
+						thecode(b[id].next,2, path, tablevel, filename, mod, deb);
+					else if (EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))
+						thecode(b[id].next, 1, path, tablevel, filename, mod, deb);
+				}
+				else if (EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0)) 
+					thecode(b[id].next,0, path, tablevel, filename, mod, deb);
+				DeleteUEntry(id, 0);
 			}
 			if (b[id].type == EXPR || b[id].type == WRITE) {
 				if (deb) cout << "<write||expr>\n";
@@ -718,9 +927,19 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 				scriecod(b[id].container, mod, filename);
 				if (b[id].type == WRITE) scriecod(")", mod, filename);
 				scriecod(";\n", mod, filename);
-
-				if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) ||
-					(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))) thecode(b[id].next, tablevel, filename, mod, deb);
+				
+				if (b[b[id].next].type == DECISION) {
+					if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) &&
+						(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0)))
+						thecode(b[id].next, 0, path, tablevel, filename, mod, deb);
+					else if (EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1))
+						thecode(b[id].next, 2, path, tablevel, filename, mod, deb);
+					else if (EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))
+						thecode(b[id].next, 1, path, tablevel, filename, mod, deb);
+				}
+				else if (EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0)) 
+					thecode(b[id].next,0, path, tablevel, filename, mod, deb);
+				DeleteUEntry(id, 0);
 			}
 		}
 		else if (deb) cout << "<used>\n";
@@ -733,30 +952,81 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 			scriecod("if(", mod, filename);
 			scriecod(b[id].container, mod, filename);
 			scriecod("){\n", mod, filename);
-			if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) ||
-				(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))) thecode(b[id].next, tablevel + 1, filename, mod, deb);
+			if (b[b[id].next].type == DECISION) {
+				if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) &&
+					(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0)))
+					thecode(b[id].next, 0, path, tablevel+1, filename, mod, deb);
+				if (EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1))
+					thecode(b[id].next, 2, path, tablevel+1, filename, mod, deb);
+				else if (EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))
+					thecode(b[id].next, 1, path, tablevel+1, filename, mod, deb);
+			}
+			else if (EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))
+				thecode(b[id].next,0, path, tablevel+1+1, filename, mod, deb);
+			/*if ((EwEntry(b[id].next, 1) == -1 || !EuEntry(b[id].next, 1)) ||
+				(EwEntry(b[id].next, 0) == -1 || !EuEntry(b[id].next, 0))) thecode(b[id].next, tablevel + 1, filename, mod, deb);*/
 			tabulation(tablevel, mod, filename);
 			scriecod("}\n", mod, filename);
 		}
 		else if (deb) cout << "<u1dec>\n";
-		if (!u2dec) {
+		u2dec = isused(id, 1);
+		if (restriction == 1) u2dec = 1;
+		if (deb) cout << "Cont: " << b[id].container << '\n';
+		if (deb) cout << "after !u1dec; u2dec: " << u2dec << '\n';
+		if (deb) {
+			cout << "EwEntryb[id].next" << EwEntry(b[id].next) << '\n';
+			cout << "EwEntryb[id].nextF" << EwEntry(b[id].nextF) << '\n';
+			cout << (-1 || -1) << '\n';
+		}
+		isnextwentry = (EwEntry(b[id].next)!=-1 || EwEntry(b[id].nextF)!=-1);
+		if (deb) cout << "isnextwentry: " << isnextwentry << '\n';
+		if (deb) cout << "wentries: "  << '\n';
+		if(deb)for (int i = 0; i < wEntries.size(); i++) {
+			cout << b[wEntries[i].beginning].container << "  ";
+		}
+		if (deb) cout << '\n';
+		if (!u2dec|| predecessors(b[id].nextF) > 1&&!isnextwentry&& b[id].nextF != -1) {
 			if (deb) cout << "<!u2dec>\n";
 			if (u1dec) {
 				tabulation(tablevel, mod, filename);
 				scriecod("if(!(", mod, filename);
 				scriecod(b[id].container, mod, filename);
 				scriecod(")){\n", mod, filename);
-				if ((EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1)) ||
-					(EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))) thecode(b[id].nextF, tablevel + 1, filename, mod, deb);
-				tabulation(tablevel, mod, filename);
+				if (b[b[id].next].type == DECISION) {
+					if ((EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1)) &&
+						(EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0)))
+						thecode(b[id].nextF, 0, path, tablevel+1, filename, mod, deb);
+					if (EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1))
+						thecode(b[id].nextF, 2, path, tablevel+1, filename, mod, deb);
+					else if (EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))
+						thecode(b[id].nextF, 1, path, tablevel+1, filename, mod, deb);
+				}
+				else if (EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))
+					thecode(b[id].nextF,0, path, tablevel+1+1, filename, mod, deb);
+
+				/*if ((EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1)) ||
+					(EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))) thecode(b[id].nextF, tablevel + 1, filename, mod, deb);*/
+				tabulation(tablevel+1, mod, filename);
 				scriecod("}\n", mod, filename);
 			}
 			else {
 				tabulation(tablevel, mod, filename);
 				scriecod("else{\n", mod, filename);
-				if ((EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1)) ||
-					(EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))) thecode(b[id].nextF, tablevel + 1, filename, mod, deb);
-				tabulation(tablevel, mod, filename);
+				if (b[b[id].next].type == DECISION) {
+					if ((EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1)) &&
+						(EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0)))
+						thecode(b[id].nextF, 0, path, tablevel+1, filename, mod, deb);
+					if (EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1))
+						thecode(b[id].nextF, 2, path, tablevel+1, filename, mod, deb);
+					else if (EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))
+						thecode(b[id].nextF, 1, path, tablevel+1, filename, mod, deb);
+				}
+				else if (EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))
+					thecode(b[id].nextF,0, path, tablevel+1+1, filename, mod, deb);
+
+				/*if ((EwEntry(b[id].nextF, 1) == -1 || !EuEntry(b[id].nextF, 1)) ||
+					(EwEntry(b[id].nextF, 0) == -1 || !EuEntry(b[id].nextF, 0))) thecode(b[id].nextF, tablevel+1 + 1, filename, mod, deb);*/
+				tabulation(tablevel+1, mod, filename);
 				scriecod("}\n", mod, filename);
 			}
 		}
@@ -764,6 +1034,15 @@ void thecode(int id, int tablevel = 0, string filename = "", bool mod = 0, bool 
 }
 void thecodelaunch(int id, string filename = "", bool mod = 0, bool deb = 0) {
 
+	
+	/*for (int i = 0; i < blkSize; i++) {
+		string s = "";
+		s += (char)(b[i].id+48);
+		s += ", ";
+		s += stringToChar(b[i].container);
+		s += "\n";
+		scriecod(s,1);
+	}*/
 	string cppform = "#include <iostream>\nusing namespace std;\n\nint main(){\n";
 	wEntries.clear();
 	uEntries.clear();
@@ -787,7 +1066,7 @@ void thecodelaunch(int id, string filename = "", bool mod = 0, bool deb = 0) {
 	if (deb)cout << "ji";
 	scriecod(variablesline + '\n', mod, filename);
 	vector<ifentry>* v = new vector<ifentry>;
-	cautawhileentries(id, *v, 0);
+	cautawhileentries(id, *v);
 	for (int i = 0; i < blkSize; i++) {
 		if (b[i].type == STOP) {
 			adduentry(i, 0);
@@ -805,7 +1084,8 @@ void thecodelaunch(int id, string filename = "", bool mod = 0, bool deb = 0) {
 	for (auto a : uEntries) {
 		if (deb) cout << a.id << ' ' << a.branch << '\n';
 	}
-	thecode(id, 1, filename, mod);
+	vector<blk> vec;
+	thecode(id,0,vec, 1, filename, mod);
 	scriecod("\n", mod, filename);
 	tabulation(1, mod, filename);
 	scriecod("return 0;\n}", mod, filename);

@@ -44,6 +44,7 @@ vector<usedentry> uEntries;
 int usize = 0;
 
 bool vizitat[mxBLK*2] = { 0 };
+int vizitatfrom[mxBLK*2] = { -1 };
 
 int drawntofr[mxBLK] = { 0 };
 int drawntofl[mxBLK] = { 0 };
