@@ -19,7 +19,9 @@
 #define WRITE    6
 
 //GRAPHICS
-#define width  800
+#define WIDTH 800
+#define HEIGHT 800
+#define width  1200//800
 #define height 800
 #define blkW  70
 #define blkH 40
@@ -48,5 +50,67 @@ int STEP_DELAY = SLOW_STEP;
 #define intermW 306
 #define intermH 70
 #define filemenuW 236
+
+//nou
+#define cpwidth	300
+#define cpheight height/2
+#define padding 10
+
+#define prop 1.5
+#define buttonh cpwidth/10 *prop
+#define buttonw cpwidth/10 *prop
+#define outpadding 10
+#define buttonx (width-cpwidth-buttonw-outpadding)
+#define buttony outpadding
+#define cpx buttonx+buttonw
+#define cpy buttony+buttonh
+#define codpaneltopoffset cpy+padding
+#define codpanelleftoffset cpx+padding
+
+#define lbuttonw  cpwidth/10 *prop
+#define lbuttonh  cpwidth/10 *prop
+#define lbuttonx (buttonx+buttonw)  
+#define lbuttony (buttony)  
+#define rbuttonw  cpwidth/10 *prop
+#define rbuttonh  cpwidth/10 *prop
+#define rbuttonx (lbuttonx+lbuttonw)  
+#define rbuttony (buttony)
+
+#define ubuttonw  cpwidth/10 *prop
+#define ubuttonh  cpwidth/10 *prop
+#define ubuttonx (buttonx)  
+#define ubuttony (buttony+buttonh)  
+#define dbuttonw  cpwidth/10 *prop
+#define dbuttonh  cpwidth/10 *prop
+#define dbuttonx (ubuttonx)  
+#define dbuttony (ubuttony+ubuttonh)
+
+#define inputx rbuttonx+rbuttonw+5
+#define inputy buttony
+#define inputw cpwidth/10*5
+#define inputh buttonh
+#define inputbg 255,255,255
+#define inputfg 0,0,0
+#define inputinpadding 5
+#define inputoutpadding 5
+#define updowncut inputh/10 
+
+#define dlbuttonx cpx + cpwidth - buttonw * 0.75
+#define dlbuttony  buttony + buttonh * 0.25
+#define dlbuttonw  buttonw*0.5
+#define dlbuttonh  buttonh*0.5
+
+#define hcpw 40
+#define hcph 40
+#define hcpx buttonx
+#define hcpy buttony+buttonh+cpheight-hcpw
+
+#define shcpw 40
+#define shcph 40
+#define shcpx cpx+cpwidth-shcpw
+#define shcpy buttony
+
+#define cpbg 4,28,48
+#define error 10
 
 #endif

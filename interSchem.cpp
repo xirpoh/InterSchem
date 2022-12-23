@@ -9,17 +9,30 @@
 #include <stack>
 using namespace std;
 
+int countercb = 0;
+int counterinters = 0;
+
+char* stringToChar(string s) {
+    char* c = (char*)malloc(s.size() + 1);
+    int i = 0;
+    for (; i < s.size(); i++)
+        c[i] = s[i];
+    c[i] = '\0';
+    return c;
+}
+
 #include "config.h"
 #include "struct.h"
-#include "Generarecod.h"
 #include "ConnectorsDrawing.h"
+#include "CodePanel.h"
 #include "blk.h"
+#include "Generarecod.h"
 #include "export.h"
 #include "interpretor.h"
 
 int main() {
     initwindow(width, height, "InterSchem");
-    //import_scheme((char*)"stackSort.sch");
+    import_scheme((char*)"stackSort.sch");
     drawScheme();
 
     while (1) {
@@ -46,12 +59,8 @@ int main() {
             doubleLeftClick();
         }
         else if (ismouseclick(WM_LBUTTONDOWN)) {
-            if (interpretor_menu()) {
-
-            }
-            else if (button()) {
-                debug(1);
-            }
+            if (interpretor_menu());
+            else if (button());
             else if (mouseHover() == 0)
                 leftClick();
         }

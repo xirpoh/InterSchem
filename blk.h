@@ -3,15 +3,6 @@
 
 char scheme_name[50] = "untitled.sch";
 
-char* stringToChar(string s) {
-    char* c = (char*)malloc(s.size() + 1);
-    int i = 0;
-    for (; i < s.size(); i++)
-        c[i] = s[i];
-    c[i] = '\0';
-    return c;
-}
-
 blk newBlk(int x, int y, int w, int h, char type) {
     blk b = { x, y, w, h, type, BLK_STROKE };
     return b;
@@ -150,16 +141,19 @@ void clearBlks() {
 void drawScheme() {
     //cleardevice();
     setfillstyle(SOLID_FILL, BG);
+    //bar(0, 0, WIDTH, HEIGHT);
     bar(0, 0, width, height);
-    readimagefile("images\\IDLE.jpg", width - 306, height - 70, width, height);
-    readimagefile("images\\FILE.jpg", width - intermW - filemenuW, height - intermH, 
-                                      width - intermW, height);
+    readimagefile("images\\IDLE.jpg", WIDTH - 306, HEIGHT - 70, WIDTH, HEIGHT);
+    readimagefile("images\\FILE.jpg", WIDTH - intermW - filemenuW, HEIGHT - intermH, 
+                                      WIDTH - intermW, HEIGHT);
 
     drawCnnt(CNNT_STROKE);
     drawBlks();
     
     setcolor(WHITE);
-    outtextxy(BOUND_TXT / 2, height - BOUND_TXT - textheight(scheme_name), scheme_name);
+    outtextxy(BOUND_TXT / 2, HEIGHT - BOUND_TXT - textheight(scheme_name), scheme_name);
+
+    drawcodebutton();
 }
 
 void resetScheme() {
@@ -207,7 +201,7 @@ bool areBlksInter(int j) {
 bool isBlkInside(blk& bl) {
     if (bl.x - BOUND < 0 || bl.y - BOUND < 0)
         return 0;
-    if (bl.x + bl.w + BOUND > width || bl.y + bl.h + BOUND > height - BOUND_TXT)
+    if (bl.x + bl.w + BOUND > WIDTH || bl.y + bl.h + BOUND > HEIGHT - BOUND_TXT)
         return 0;
     return 1;
 }
@@ -217,6 +211,9 @@ void leftClick() {
     clearmouseclick(WM_LBUTTONUP);
 
     int mx = mousex(), my = mousey(), idx = selectBlk(mx, my);
+
+    if (mx > WIDTH || my > HEIGHT - intermH)
+        return;
 
     if (idx >= 0) {
         blk& bl = b[idx];
@@ -239,12 +236,12 @@ void leftClick() {
                 if (b[i].color == LIGHTBLUE)
                     clearBlk(b[i]);
 
-            blk cpy = bl;
+            blk _cpy = bl;
             bl.x = mousex() + dx;
             bl.y = mousey() + dy;
 
             if (areBlksInter(idx) || !isBlkInside(bl))
-                bl = cpy;
+                bl = _cpy;
             
             for (int i = 0; i < blkSize; i++)
                 if (i != idx && b[i].color == LIGHTBLUE) {

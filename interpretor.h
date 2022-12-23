@@ -193,7 +193,7 @@ void drawNextCnnt(blk& b1, blk& b2, bool brnch = 0) {
 
 void draw_regPanel(int color) {
     setcolor(color);
-    int varX = width - 120, varY = 20;
+    int varX = WIDTH - 120, varY = 20;
 
     for (int i = 0; i < regSize; i++) {
         char* line = stringToChar(r[i].name);
@@ -211,10 +211,10 @@ void draw_regPanel(int color) {
 
 char get_button_key(int mx, int my, bool exec = 0) {
     clearmouseclick(WM_LBUTTONDOWN);
-    if (mx > width - intermW - filemenuW && mx < width &&
-        my > height - intermH && my < height) {
-        mx -= width - intermW - filemenuW;
-        my -= height - intermH;
+    if (mx > WIDTH - intermW - filemenuW && mx < WIDTH &&
+        my > HEIGHT - intermH && my < HEIGHT) {
+        mx -= WIDTH - intermW - filemenuW;
+        my -= HEIGHT - intermH;
 
         int dw = (intermW + 236) / 7;
         string keys = "NOSqnmf";
@@ -228,7 +228,7 @@ char get_button_key(int mx, int my, bool exec = 0) {
 }
 
 void interbutton(const char* image_name) {
-    readimagefile(image_name, width - intermW, height - intermH, width, height);
+    readimagefile(image_name, WIDTH - intermW, HEIGHT - intermH, WIDTH, HEIGHT);
 }
 
 void wait_key(int& mode) {

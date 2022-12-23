@@ -1,5 +1,5 @@
-int countercb = 0;
-int counterinters = 0;
+int gx1, gy1, gx2, gy2, gx3, gy3, gx4, gy4, gx5, gy5,gx6,gy6;
+
 
 int cadran(blk& b1, blk& b2, bool branch = 0) {
 
@@ -75,12 +75,27 @@ int cadran(blk& b1, blk& b2, bool branch = 0) {
         }
     }
 }
-void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
-    bool deb = 0, ok = 1, hihglight = 0;
+void bypassingline(int &x1, int &y1, int& x2, int& y2, int x3, int y3, int id) { 
+    bool deb =0, ok = 1, hihglight = 1;
     bool ignore = 0;
     bool intersecteaza = 0;
     int hoffset = 10, voffset = 10;
     bool caz, dir, dir3;
+    static int ctr = 0;
+    int color1, color2, color3, color4, color5, color6;
+    color1 = COLOR(255, 0, 0);
+    color2 = COLOR(255,255, 0);
+    color3 = COLOR(0, 255, 0);
+    color4 = COLOR(0,255,255);
+    color5 = COLOR(0,0,255);
+    color6 = COLOR(255, 0, 255); 
+
+
+    /*if (ctr > 50) {
+        ctr = 0;
+        return;
+    }*/
+    ctr++;
     if (x1 == x2) caz = 1;//vert
     else if (y1 == y2) caz = 0;//horiz
     else { cout << "Error: linia e diagonala\n"; return; }
@@ -115,19 +130,24 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                 (x1 >= a2 + hoffset) && (x2 >= a2 + hoffset) || (x1 <= a1 - hoffset) && (x2 <= a1 - hoffset)) continue; 
             if (((x1 < a2 + hoffset) && (x1 > a1 - hoffset)) ||
                 ((x2 < a2 + hoffset) && (x2 > a1 - hoffset))) {
-                //un punct interior folosim x3 y3 
+                //un punct interior folosim x3 y3
                 counterinters++;
                 if (deb) {
-                    cout << "blocul cu care se intersecteaza e " << i<<'\n';
+                    printf("%d se intersecteaza cu %d\n", id, i);
                     printf("punct interior\n");
                     printf("dir %d\t", dir);
                     printf("caz 0\t");
                     printf("x1= %d, y1= %d, x2= %d, y2= %d, x3= %d, y3= %d\n", x1, y1, x2, y2, x3, y3);
                     printf("a1= %d, a2= %d, b1= %d, b2= %d\n", a1, a2, b1, b2);
                     if (hihglight) {
-                        setfillstyle(SOLID_FILL, RED);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color1);
+                        else setfillstyle(SOLID_FILL, color2);
                         fillellipse(x1, y1, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color3);
+                        else setfillstyle(SOLID_FILL, color4);
                         fillellipse(x2, y2, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color5);
+                        else setfillstyle(SOLID_FILL, color6);
                         fillellipse(x3, y3, 6, 6);
                         setfillstyle(SOLID_FILL, BLACK);
                     }
@@ -140,11 +160,9 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                 if (dir == 0) cut1 = a1 - hoffset;
                 else cut1 = a2 + hoffset;
                 cut2 = x3; 
-                bypassingline(x1, y, cut1, y, 0, 0); 
+                bypassingline(x1, y, cut1, y, 0, 0, id);
                 line(cut1, y, cut1, aux1);
-                line(cut1, aux1, cut2, aux1);
-                x2 = cut2;
-                y2 = aux1;
+                line(cut1, aux1, cut2, aux1);                
                 if (deb) {
                     if (hihglight) {
                         fillellipse(x1, y1, 6, 6);
@@ -152,6 +170,8 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                         fillellipse(x3, y3, 6, 6);
                     }
                 }
+                x2 = cut2;
+                y2 = aux1;
                 break;
             }
             else if (((x1 < a1 - hoffset) && (x2 > a2 + hoffset)) ||
@@ -159,7 +179,7 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                 //ambele exteriorare
                 counterinters++;
                 if (deb) {
-                    cout << "blocul cu care se intersecteaza e " << i << '\n';
+                    printf("%d se intersecteaza cu %d\n", id, i);
                     printf("ambele exterioare\n");
                     printf("dir %d\t", dir);
                     printf("caz 0\t");
@@ -167,9 +187,16 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                     printf("a1= %d, a2= %d, b1= %d, b2= %d\n", a1, a2, b1, b2);
                     setfillstyle(SOLID_FILL, RED);
                     if (hihglight) {
+                        if (dir == 0) setfillstyle(SOLID_FILL, color1);
+                        else setfillstyle(SOLID_FILL, color2);
                         fillellipse(x1, y1, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color3);
+                        else setfillstyle(SOLID_FILL, color4);
                         fillellipse(x2, y2, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color5);
+                        else setfillstyle(SOLID_FILL, color6);
                         fillellipse(x3, y3, 6, 6);
+                        setfillstyle(SOLID_FILL, BLACK);
                     }
                     setfillstyle(SOLID_FILL, BLACK);
                 }
@@ -178,20 +205,23 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                 cut2 = a2 + hoffset;
                 if ((y - b1 - voffset) < (b2 + voffset - y)) aux1 = aux2 = b1 - voffset;
                 else aux1 = aux2 = b2 + voffset; 
-                if (dir == 0) bypassingline(x1, y, cut1, y, x3, y3);
-                else bypassingline(x2, y, cut1, y, x3, y3); 
+                if (dir == 0) bypassingline(x1, y, cut1, y, x3, y3, id);
+                else bypassingline(x2, y, cut1, y, x3, y3, id);
                 line(cut1, y, cut1, aux1);
                 line(cut1, aux1, cut2, aux2);
                 line(cut2, aux2, cut2, y);
-                if (dir == 0) bypassingline(cut2, y, x2, y, x3, y3);
-                else bypassingline(cut2, y, x1, y, x3, y3); 
-                break;
-            }if (deb) {
-                if (hihglight) {
-                    fillellipse(x1, y1, 6, 6);
-                    fillellipse(x2, y2, 6, 6);
-                    fillellipse(x3, y3, 6, 6);
+                if (dir == 0) bypassingline(cut2, y, x2, y2, x3, y3, id);
+                else bypassingline(cut2, y, x1, y2, x3, y3, id);
+                /*if (dir == 0) bypassingline(cut2, y, x2, y, x3, y3, id);
+                else bypassingline(cut2, y, x1, y, x3, y3, id);*/
+                if (deb) {
+                    if (hihglight) {
+                        fillellipse(x1, y1, 6, 6);
+                        fillellipse(x2, y2, 6, 6);
+                        fillellipse(x3, y3, 6, 6);
+                    }
                 }
+                break;
             }
         }
         else {
@@ -201,9 +231,9 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
             if (((y1 < b2 + voffset) && (y1 > b1 - voffset)) ||
                 ((y2 < b2 + voffset) && (y2 > b1 - voffset))) {
                 //un punct interior folosim x3 y3
-                counterinters++;
+                counterinters++; 
                 if (deb) {
-                    cout << "blocul cu care se intersecteaza e " << i << '\n';
+                    printf("%d se intersecteaza cu %d\n", id, i);
                     printf("punct interior\n");
                     printf("dir %d\t", dir);
                     printf("caz 1\t");
@@ -211,9 +241,16 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                     printf("a1= %d, a2= %d, b1= %d, b2= %d\n", a1, a2, b1, b2);
                     setfillstyle(SOLID_FILL, RED);
                     if (hihglight) {
+                        if (dir == 0) setfillstyle(SOLID_FILL, color1);
+                        else setfillstyle(SOLID_FILL, color2);
                         fillellipse(x1, y1, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color3);
+                        else setfillstyle(SOLID_FILL, color4);
                         fillellipse(x2, y2, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color5);
+                        else setfillstyle(SOLID_FILL, color6);
                         fillellipse(x3, y3, 6, 6);
+                        setfillstyle(SOLID_FILL, BLACK);
                     }
                     setfillstyle(SOLID_FILL, BLACK);
                 }
@@ -226,25 +263,29 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                 if (dir3 == 0) cut1 = a2 + hoffset;
                 else cut1 = a1 - hoffset;
                 aux2 = y3;
-                bypassingline(x, y1, x, aux1, 0, 0);
+                
+                bypassingline(x, y1, x1, aux1, 0, 0, id);                
                 line(x, aux1, cut1, aux1);
                 line(cut1, aux1, cut1, aux2);
-                x2 = cut1;
-                y2 = aux2; if (deb) {
+                 if (deb) {
                     if (hihglight) {
                         fillellipse(x1, y1, 6, 6);
                         fillellipse(x2, y2, 6, 6);
                         fillellipse(x3, y3, 6, 6);
                     }
-                }
+                 } 
+                 
+                 x2 = cut1;
+                 y2 = aux2; 
+                 
                 break;
             }
             else if (((y1 < b1 - voffset) && (y2 > b2 + voffset)) ||
                 ((y1 > b2 + voffset) && (y2 < y1 - voffset))) {
                 //ambele exteriorare
-                counterinters++;
-                 if (deb) { 
-                    cout << "blocul cu care se intersecteaza e " << i << '\n';
+                counterinters++; 
+                 if (deb) {
+                     printf("%d se intersecteaza cu %d\n", id, i);
                     printf("ambele exterioare\n");
                     printf("dir %d\t", dir);
                     printf("caz 1\t");
@@ -252,9 +293,16 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                     printf("a1= %d, a2= %d, b1= %d, b2= %d\n", a1, a2, b1, b2);
                     setfillstyle(SOLID_FILL, RED);
                     if (hihglight) {
+                        if (dir == 0) setfillstyle(SOLID_FILL, color1);
+                        else setfillstyle(SOLID_FILL, color2);
                         fillellipse(x1, y1, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color3);
+                        else setfillstyle(SOLID_FILL, color4);
                         fillellipse(x2, y2, 6, 6);
+                        if (dir == 0) setfillstyle(SOLID_FILL, color5);
+                        else setfillstyle(SOLID_FILL, color6);
                         fillellipse(x3, y3, 6, 6);
+                        setfillstyle(SOLID_FILL, BLACK);
                     }
                     setfillstyle(SOLID_FILL, BLACK);
                  }
@@ -271,11 +319,13 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
                     aux2 = b1 - voffset;
                     aux1 = b2 + voffset;
                 }
-                bypassingline(x, y1, x, aux1, x3, y3);
+                bypassingline(x1, y1, x1, aux1, x3, y3,id);
+                //bypassingline(x1, y1, x, aux1, x3, y3, id);
                 line(x, aux1, cut1, aux1);
                 line(cut1, aux1, cut1, aux2);
                 line(cut1, aux2, x, aux2);
-                bypassingline(x, aux2, x, y2, x3, y3);
+                bypassingline(x1, aux2, x2, y2, x3, y3,id);
+                //bypassingline(x1, aux2, x, y2, x3, y3, id);
                 if (deb) {
                     if (hihglight) {
                         fillellipse(x1, y1, 6, 6);
@@ -289,30 +339,39 @@ void bypassingline(int x1, int y1, int& x2, int& y2, int x3, int y3) {
     }
     if (ok) {
         countercb++;
+        //printf("Caz obisnuit: x1= %d, y1= %d, x2= %d, y2= %d, x3= %d, y3= %d\n", x1, y1, x2, y2, x3, y3);
         line(x1, y1, x2, y2);
     }
 } 
 
 void drawlines(int p0x, int p0y, int p1x, int p1y,
     int p2x, int p2y, int p3x, int p3y, int p4x, int p4y, int id, int p5x, int p5y, bool applyinend) {
-     
+    //cout << "drawlines\n";
     if (applyinend) {
         //cout << "Applyinend\n";
         line(p0x, p0y, p5x, p5y);
-        bypassingline(p5x, p5y, p1x, p1y, p2x, p2y);
-        bypassingline(p3x, p3y, p4x, p4y, 0, 0);
+        //printf("Frist bl,app: %d, %d, %d, %d\n", p5x, p5y, p1x, p1y);
+        bypassingline(p5x, p5y, p1x, p1y, p2x, p2y,id);
+        //printf("Second bl,app: %d, %d, %d, %d\n", p3x, p3y, p4x, p4y);
+        bypassingline(p3x, p3y, p4x, p4y, 0, 0,id);
     }
     else {
-        line(p0x, p0y, p5x, p5y);
-        bypassingline(p5x, p5y, p1x, p1y, p2x, p2y);
-        bypassingline(p1x, p1y, p2x, p2y, p3x, p3y);
-        bypassingline(p2x, p2y, p3x, p3y, p4x, p4y);
+        line(p0x, p0y, p5x, p5y); 
+        //printf("Frist bl: x1= %d, y1= %d, x2= %d, y2= %d\n",p5x,p5y,p1x,p1y);
+        //printf("Frist bl: &x1= %d, &y1= %d, &x2= %d, %y2= %d\n", &p5x, &p5y,&p1x,&p1y);
+        bypassingline(p5x, p5y, p1x, p1y, p2x, p2y, id);
+        //printf("Second bl: x1= %d, y1= %d, x2= %d, y2= %d\n", p1x, p1y, p2x, p2y);
+        //printf("Frist bl: &x1= %d, &y1= %d, &x2= %d, %y2= %d\n", &p1x, &p1y,&p2x,&p2y);
+        bypassingline(p1x, p1y, p2x, p2y, p3x, p3y, id);
+        //printf("Third bl: x1= %d, y1= %d, x2= %d, y2= %d\n", p2x, p2y,p3x,p3y);
+        //printf("Frist bl: &x1= %d, &y1= %d, &x2= %d, %y2= %d\n", &p2x, &p2y,&p3x,&p3y);
+        bypassingline(p2x, p2y, p3x, p3y, p4x, p4y, id);
         line(p3x, p3y, p4x, p4y);
     }  
     
 
 }
-void drawaux(blk& b1, blk& b2, int color, int type, bool side, int id=-1, bool branch=0, int color1 = -1) {
+void drawaux(blk& b1, blk& b2, int color, int type, bool side, int id=-1, bool branch=0, int color1 = -1) { 
     int caz;
     static int counter = 0;
     caz = cadran(b1, b2);
@@ -448,8 +507,10 @@ void drawaux(blk& b1, blk& b2, int color, int type, bool side, int id=-1, bool b
         if (b1.id == id && (b1.type != DECISION ||side==branch)) {
             setcolor(color1);
         }
-        
-        drawlines(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, b1.id, p5x, p5y, applyinend);
+        //printf("From %d to %d\n", b1.id, b2.id);
+        gx1 = p0x, gy1 = p0y, gx2 = p1x, gy2 = p1y, gx3 = p2x, gy3 = p2y, gx4 = p3x, 
+            gy4 = p3y, gx5 = p4x, gy5 = p4y, gx6 = p5x, gy6 = p5y;
+        drawlines(gx1,gy1,gx2,gy2,gx3,gy3,gx4,gy4, gx5, gy5, b1.id,gx6,gy6, applyinend);
         setcolor(color);
         ignorewhendrawingines[b1.id] = 0;
         ignorewhendrawingines[b2.id] = 0;
@@ -486,4 +547,3 @@ void drawCnnt(int color, int id=-1,bool branch = 0, int color1=-1) {
         }
     }
 }
-
