@@ -335,7 +335,8 @@ bool EuEntry(int id, int branch = 0) {
 	return 0;
 }
 bool isused(int id, int branch = 0, bool deb = 0) {
-	if (deb) cout << "id " << id << ' ';
+	deb = 0;
+    if (deb) cout << "id " << id << ' ';
 	if (b[id].type != DECISION) {
 		if (branch == 1) return 1;
 		if (EuEntry(id, 0)) {
@@ -401,14 +402,14 @@ vector<string> functions = { "fabs", "exp", "log", "log2", "log10",
 bool isvariable(string sequence) {
 	int max;
 	string element;
-	cout << "Trying in variable\n";
+	//cout << "Trying in variable\n";
 	;
 	for (int i = 0; i < mxBLK; i++) {
 		if (b[i].type == READ) element = b[i].container;
 		else continue;
 		max = element.size() > sequence.size() ? element.size() : sequence.size();
-		printf("S: %s, %d\nelement: %s, %d\nmax: %d\n", stringToChar(sequence), sequence.size(),
-			stringToChar(element), element.size(), max);
+		//printf("S: %s, %d\nelement: %s, %d\nmax: %d\n", stringToChar(sequence), sequence.size(),
+			//stringToChar(element), element.size(), max);
 		if (strncmp(stringToChar(sequence), stringToChar(b[i].container), b[i].container.size()) == 0)
 			return true;
 	}
@@ -417,12 +418,12 @@ bool isvariable(string sequence) {
 }
 bool ismemberofvector(string s, vector <string>& checkin) {
 	int max;
-	cout << "Trying in membofvector\n";
+	//cout << "Trying in membofvector\n";
 	;
 	for (string element : checkin) {		
 		max = element.size() > s.size() ? element.size() : s.size();	
-		printf("S: %s, %d\nelement: %s, %d\nmax: %d\n", stringToChar(s), s.size(),
-			stringToChar(element), element.size(), max);
+		//printf("S: %s, %d\nelement: %s, %d\nmax: %d\n", stringToChar(s), s.size(),
+			//stringToChar(element), element.size(), max);
 
 		if (strncmp(stringToChar(s), stringToChar(element), max) == 0) return true;
 	} 
@@ -693,7 +694,7 @@ string getsubword(string sequence, int beginning) {
 
 }
 void scriecod(string sequence, bool mod = 0, string filename = "") {
-	bool deb = 1;
+	bool deb = 0;
 	//if (deb)printf("Scriecod, sequence= \n%s\n", stringToChar(sequence));
 	int lp = 0, rp = 0;
 	int caz;  
@@ -713,11 +714,11 @@ void scriecod(string sequence, bool mod = 0, string filename = "") {
 		return;
 	}
 	while (lp < sequence.size()) {
-		cout << lp << '\n';
+		//cout << lp << '\n';
 		string subword = getsubword(sequence, lp);
 		if (subword.size() > 0) {
-			cout << "Subword: \n";
-			cout << subword << '\n';
+			//cout << "Subword: \n";
+			//cout << subword << '\n';
 			rp = lp + subword.size() - 1;
 			if (ismemberofvector(subword, vartypes)) {
 				if (deb)cout << "vartypet\n";
@@ -741,7 +742,7 @@ void scriecod(string sequence, bool mod = 0, string filename = "") {
 			}
 		}
 		else {
-			cout << "Not Subword\n";
+			//cout << "Not Subword\n";
 			if ((rp = isconstant(sequence, lp)) != lp - 1) {
 				if (deb)cout << "const\n";
 				writeaccordingtocase(caz, sequence, lp, rp, stdwpar, new rgbcolor{ constcolorr,constcolorg,constcolorb });
@@ -1043,6 +1044,7 @@ void thecodelaunch(int id, string filename = "", bool mod = 0, bool deb = 0) {
 		s += "\n";
 		scriecod(s,1);
 	}*/
+    deb = 0;
 	string cppform = "#include <iostream>\nusing namespace std;\n\nint main(){\n";
 	wEntries.clear();
 	uEntries.clear();
@@ -1110,7 +1112,7 @@ bool button() {
     clearmouseclick(WM_LBUTTONUP);
 	int x = mousex(), y = mousey();
 	if (x <= (buttonx + buttonw) && x >= buttonx && y >= buttony && y <= (buttonh + buttony)) {
-		system("CLS");
+		//system("CLS");
 		colorcp();
 		skiptop = 0;
 		skiptopaux = skiptop;
@@ -1121,7 +1123,7 @@ bool button() {
 	}
 	else if (x <= (lbuttonx + lbuttonw) && x >= lbuttonx && y >= lbuttony && y <= (lbuttonh + lbuttony)) {
 		if (skipleft > 0) {
-			system("CLS");
+			//system("CLS");
 			skipleft--;
 			colorcp();
 			debug(1);
@@ -1130,7 +1132,7 @@ bool button() {
 	}
 	else if (x <= (rbuttonx + rbuttonw) && x >= rbuttonx && y >= rbuttony && y <= (rbuttonh + rbuttony)) {
 		if (skipleft < cpwidth / 8) {
-			system("CLS");
+			//system("CLS");
 			skipleft++;
 			colorcp();
 			debug(1);
@@ -1139,7 +1141,7 @@ bool button() {
 	}
 	else if (x <= (ubuttonx + ubuttonw) && x >= ubuttonx && y >= ubuttony && y <= (ubuttonh + ubuttony)) {
 		if (skiptop > 0) {
-			system("CLS");
+			//system("CLS");
 			skiptop--;
 			colorcp();
 			debug(1);
@@ -1148,7 +1150,7 @@ bool button() {
 	}
 	else if (x <= (dbuttonx + dbuttonw) && x >= dbuttonx && y >= dbuttony && y <= (dbuttonh + dbuttony)) {
 		if (skiptop < cpheight / 16) {
-			system("CLS");
+			//system("CLS");
 			skiptop++;
 			colorcp();
 			debug(1);
