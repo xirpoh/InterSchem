@@ -1,3 +1,6 @@
+int countercb = 0;
+int counterinters = 0;
+
 int gx1, gy1, gx2, gy2, gx3, gy3, gx4, gy4, gx5, gy5,gx6,gy6;
 
 

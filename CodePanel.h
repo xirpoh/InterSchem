@@ -1,3 +1,12 @@
+char* stringToChar(string s) {
+    char* c = (char*)malloc(s.size() + 1);
+    int i = 0;
+    for (; i < s.size(); i++)
+        c[i] = s[i];
+    c[i] = '\0';
+    return c;
+}
+
 bool cphidden = 1;
 
 
