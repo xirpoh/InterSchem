@@ -86,7 +86,7 @@ void tabulation(int tablevel, bool mod = 0, string filename = "") {
 		for (int i = 0; i < tablevel * 2; i++) {
 			if (skipleftaux > 0) skipleftaux--;
 			else {
-				outtextxy(codpaneltopoffset + writtenlength, codpanelleftoffset + writtenheight, (char*)"  ");
+				outtextxy(codpaneltopoffset + writtenlength, codpanelleftoffset + writtenheight, (char*)" ");
 				writtenlength += textwidth((char*)"  ");
 			}
 		}
@@ -319,6 +319,9 @@ void cautawhileentries(int id, vector<ifentry> &path, int tablevel = 0, bool deb
 	}
 }
 string pathtostring(int wid) {
+    if (lastifentryinpath(wEntries[wid].path)==-1)
+        return "1";
+
 	string s = "";
 	vector<ifentry> copy;
 	int start = wEntries[wid].beginning;
@@ -1072,15 +1075,7 @@ void thecode(int id,char restriction,vector<ifentry> &path,  int tablevel = 0, s
 }
 void thecodelaunch(int id, string filename = "", bool mod = 0, bool deb = 0) {
 
-	
-	/*for (int i = 0; i < blkSize; i++) {
-		string s = "";
-		s += (char)(b[i].id+48);
-		s += ", ";
-		s += stringToChar(b[i].container);
-		s += "\n";
-		scriecod(s,1);
-	} */
+
 	string cppform = "#include <iostream>\nusing namespace std;\n\nint main(){\n";
 	wEntries.clear();
 	uEntries.clear();
@@ -1129,7 +1124,7 @@ void thecodelaunch(int id, string filename = "", bool mod = 0, bool deb = 0) {
 	scriecod("return 0;\n}", mod, filename);
 	if (deb) cout << "finish\n";
 }
-void debug(int func) {
+void debug(int func, string filename="") {
 
 
 	for (int i = 0; i < mxBLK * 2; i++) vizitat[i] = 0;
@@ -1138,7 +1133,7 @@ void debug(int func) {
 	writtenheight = 0;
 	skiptopaux = skiptop;
 	skipleftaux = skipleft;
-	thecodelaunch(0, "", mod);
+	thecodelaunch(0, filename, mod);
 }
 void cleancodepanel() {
 
@@ -1205,14 +1200,14 @@ bool button() {
 		}
 		if (fs > 4 && fn[fs - 4] == '.' && ((fn[fs - 1] == 't' && fn[fs - 2] == 'x' && fn[fs - 3] == 't') ||
 			(fn[fs - 1] == 'p' && fn[fs - 2] == 'p' && fn[fs - 3] == 'c'))) {
-			cout << "aici\n";
+			//cout << "aici\n";
 
 			string eventualfilename = "savedcpps\\";
 			eventualfilename += fn;
 			FILE* fptr = fopen(stringToChar(eventualfilename), "w");
 			fprintf(fptr, "");
 			fclose(fptr);
-			thecodelaunch(0, fn);
+			debug(0, fn);
 		}
 		else generalwindow((char*)"Invaid filename!", 150, 150);
 		return true;

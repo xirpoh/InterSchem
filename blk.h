@@ -516,7 +516,10 @@ void createCnnt(int source, int br) {
         delay(DELAY);
     }
     int idx = selectBlk(mousex(), mousey());
-    if (idx >= 0 && idx != source && b[idx].type != START) {
+    if (idx >= 0 && b[idx].type != START) {
+        if (idx == source) {
+            if (b[source].type != DECISION) return;
+        }
         if (br)
             b[source].nextF = idx;
         else
